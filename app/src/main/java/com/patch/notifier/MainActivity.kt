@@ -4,7 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,7 +15,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.collectAsState
 import com.patch.notifier.alarm.AlarmScheduler
 import com.patch.notifier.data.PatchDatabase
 import com.patch.notifier.data.suggestLocations
@@ -27,7 +27,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : ComponentActivity() {
 
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission(),
@@ -53,7 +53,7 @@ class MainActivity : AppCompatActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = Navy,
                 ) {
-                    val patches by dao.observeAll().collectAsStateWithLifecycle(initialValue = emptyList())
+                    val patches by dao.observeAll().collectAsState(initial = emptyList())
                     var selectedIds by remember { mutableStateOf<Set<Int>>(emptySet()) }
                     var suggestionsApplied by remember { mutableStateOf(false) }
                     var showConfirmation by remember { mutableStateOf(false) }
