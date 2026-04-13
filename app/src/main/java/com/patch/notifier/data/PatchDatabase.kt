@@ -19,29 +19,32 @@ abstract class PatchDatabase : RoomDatabase() {
 
         fun getInstance(context: Context): PatchDatabase {
             return INSTANCE ?: synchronized(this) {
-                INSTANCE ?: Room.databaseBuilder(
-                    context.applicationContext,
-                    PatchDatabase::class.java,
-                    "patch_db",
-                )
-                    .addCallback(object : Callback() {
-                        override fun onCreate(db: SupportSQLiteDatabase) {
-                            super.onCreate(db)
-                            CoroutineScope(Dispatchers.IO).launch {
-                                getInstance(context).patchDao().upsertAll(
-                                    listOf(
-                                        Patch(1, "Left Upper", null, null),
-                                        Patch(2, "Left Lower", null, null),
-                                        Patch(3, "Right Upper", null, null),
-                                        Patch(4, "Right Lower", null, null),
-                                    )
-                                )
-                            }
-                        }
-                    })
-                    .build()
-                    .also { INSTANCE = it }
+                INSTANCE ?: buildDatabase(context).also { INSTANCE = it }
             }
+        }
+
+        private fun buildDatabase(context: Context): PatchDatabase {
+            return Room.databaseBuilder(
+                context.applicationContext,
+                PatchDatabase::class.java,
+                "patch_db",
+            )
+                .addCallback(object : Callback() {
+                    override fun onCreate(db: SupportSQLiteDatabase) {
+                        super.onCreate(db)
+                        CoroutineScope(Dispatchers.IO).launch {
+                            INSTANCE?.patchDao()?.upsertAll(
+                                listOf(
+                                    Patch(1, "Left Upper", null, null),
+                                    Patch(2, "Left Lower", null, null),
+                                    Patch(3, "Right Upper", null, null),
+                                    Patch(4, "Right Lower", null, null),
+                                )
+                            )
+                        }
+                    }
+                })
+                .build()
         }
     }
 }
