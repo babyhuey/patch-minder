@@ -93,11 +93,11 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
 
+                            selectedIds = emptySet()
                             showConfirmation = true
                             CoroutineScope(Dispatchers.Main).launch {
                                 delay(1500)
                                 showConfirmation = false
-                                suggestionsApplied = false
                             }
                         },
                         showConfirmation = showConfirmation,

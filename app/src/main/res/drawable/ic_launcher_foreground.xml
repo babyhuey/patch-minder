@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Patch shape - rounded square rotated 45 degrees like a bandage -->
+    <group
+        android:pivotX="54"
+        android:pivotY="54"
+        android:rotation="45">
+        <path
+            android:pathData="M34,34h40v40h-40z"
+            android:fillColor="#3D5AFE"
+            android:strokeWidth="3"
+            android:strokeColor="#6979F8" />
+        <!-- Adhesive dots on the patch -->
+        <path
+            android:pathData="M48,48m-3,0a3,3 0,1 1,6 0a3,3 0,1 1,-6 0"
+            android:fillColor="#1A1A2E" />
+        <path
+            android:pathData="M60,48m-3,0a3,3 0,1 1,6 0a3,3 0,1 1,-6 0"
+            android:fillColor="#1A1A2E" />
+        <path
+            android:pathData="M48,60m-3,0a3,3 0,1 1,6 0a3,3 0,1 1,-6 0"
+            android:fillColor="#1A1A2E" />
+        <path
+            android:pathData="M60,60m-3,0a3,3 0,1 1,6 0a3,3 0,1 1,-6 0"
+            android:fillColor="#1A1A2E" />
+    </group>
+
+    <!-- Small clock indicator in bottom right -->
+    <path
+        android:pathData="M72,72m-10,0a10,10 0,1 1,20 0a10,10 0,1 1,-20 0"
+        android:fillColor="#1A1A2E"
+        android:strokeWidth="1.5"
+        android:strokeColor="#6979F8" />
+    <!-- Clock hands -->
+    <path
+        android:pathData="M72,72L72,66"
+        android:strokeWidth="1.5"
+        android:strokeColor="#E0E0FF"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M72,72L76,72"
+        android:strokeWidth="1.5"
+        android:strokeColor="#E0E0FF"
+        android:strokeLineCap="round" />
+</vector>
