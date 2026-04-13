@@ -18,6 +18,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
+import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -203,6 +204,7 @@ private fun ThighColumn(
                     LocationButton(
                         label = patch.location.substringAfter(" "),
                         selected = selected,
+                        dueAt = patch.dueAt,
                         onClick = { onToggle(patch.id) },
                     )
                 }
@@ -215,6 +217,7 @@ private fun ThighColumn(
 private fun LocationButton(
     label: String,
     selected: Boolean,
+    dueAt: Long?,
     onClick: () -> Unit,
 ) {
     val backgroundColor by animateColorAsState(
@@ -230,6 +233,16 @@ private fun LocationButton(
         label = "text",
     )
 
+    val daysLeftText = dueAt?.let {
+        val days = TimeUnit.MILLISECONDS.toDays(it - System.currentTimeMillis())
+        when {
+            days < 0 -> "overdue!"
+            days == 0L -> "due today"
+            days == 1L -> "1 day left"
+            else -> "${days}d left"
+        }
+    }
+
     Card(
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = backgroundColor),
@@ -238,11 +251,11 @@ private fun LocationButton(
             .fillMaxWidth()
             .clickable(onClick = onClick),
     ) {
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 14.dp),
-            contentAlignment = Alignment.Center,
+                .padding(vertical = 12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
                 text = if (selected) "✓ $label" else label,
@@ -251,6 +264,14 @@ private fun LocationButton(
                 fontSize = 15.sp,
                 textAlign = TextAlign.Center,
             )
+            if (daysLeftText != null) {
+                Text(
+                    text = daysLeftText,
+                    color = if (daysLeftText.contains("overdue")) Color(0xFFEF4444) else TextMuted,
+                    fontSize = 11.sp,
+                    textAlign = TextAlign.Center,
+                )
+            }
         }
     }
 }
