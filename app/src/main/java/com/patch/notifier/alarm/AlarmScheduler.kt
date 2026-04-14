@@ -72,10 +72,9 @@ object AlarmScheduler {
             set(Calendar.SECOND, 0)
             set(Calendar.MILLISECOND, 0)
         }
-        // If preferred time on due day is before the actual due time,
-        // the patch isn't due yet at that hour — use the same day.
-        // If preferred time is after now, use it. Otherwise next day.
-        if (cal.timeInMillis < System.currentTimeMillis()) {
+        // If the preferred time on the due day is before the raw due instant,
+        // the patch isn't due yet at that hour — push to the next day.
+        if (cal.timeInMillis < dueAtMs) {
             cal.add(Calendar.DAY_OF_MONTH, 1)
         }
         return cal.timeInMillis

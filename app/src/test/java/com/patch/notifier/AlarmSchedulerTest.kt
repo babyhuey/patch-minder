@@ -86,11 +86,18 @@ class AlarmSchedulerTest {
     }
 
     // --- adjustToNotifyTime ---
+    // Uses a fixed dueAt: 2025-06-15 14:30:00 UTC
+
+    private fun fixedDueAt(): Long {
+        return Calendar.getInstance().apply {
+            set(2025, Calendar.JUNE, 15, 14, 30, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+    }
 
     @Test
     fun `adjustToNotifyTime sets correct hour and minute`() {
-        val dueAt = System.currentTimeMillis() + 7L * 24 * 60 * 60 * 1000
-        val adjusted = AlarmScheduler.adjustToNotifyTime(dueAt, 9, 30)
+        val adjusted = AlarmScheduler.adjustToNotifyTime(fixedDueAt(), 9, 30)
         val cal = Calendar.getInstance().apply { timeInMillis = adjusted }
         assertEquals(9, cal.get(Calendar.HOUR_OF_DAY))
         assertEquals(30, cal.get(Calendar.MINUTE))
@@ -98,18 +105,52 @@ class AlarmSchedulerTest {
     }
 
     @Test
-    fun `adjustToNotifyTime result is in the future`() {
-        val dueAt = System.currentTimeMillis() + 7L * 24 * 60 * 60 * 1000
-        val adjusted = AlarmScheduler.adjustToNotifyTime(dueAt, 9, 0)
-        assertTrue("Adjusted time should be in the future", adjusted > System.currentTimeMillis())
+    fun `adjustToNotifyTime - preferred time before dueAt on same day pushes to next day`() {
+        // dueAt is 14:30, preferred is 9:00 -> 9:00 on Jun 15 is before 14:30 -> push to Jun 16
+        val adjusted = AlarmScheduler.adjustToNotifyTime(fixedDueAt(), 9, 0)
+        val cal = Calendar.getInstance().apply { timeInMillis = adjusted }
+        assertEquals(16, cal.get(Calendar.DAY_OF_MONTH)) // next day
+        assertEquals(9, cal.get(Calendar.HOUR_OF_DAY))
+    }
+
+    @Test
+    fun `adjustToNotifyTime - preferred time after dueAt on same day stays on same day`() {
+        // dueAt is 14:30, preferred is 18:00 -> 18:00 on Jun 15 is after 14:30 -> same day
+        val adjusted = AlarmScheduler.adjustToNotifyTime(fixedDueAt(), 18, 0)
+        val cal = Calendar.getInstance().apply { timeInMillis = adjusted }
+        assertEquals(15, cal.get(Calendar.DAY_OF_MONTH)) // same day
+        assertEquals(18, cal.get(Calendar.HOUR_OF_DAY))
+    }
+
+    @Test
+    fun `adjustToNotifyTime - result is always at or after dueAt`() {
+        val dueAt = fixedDueAt()
+        for (hour in 0..23) {
+            val adjusted = AlarmScheduler.adjustToNotifyTime(dueAt, hour, 0)
+            assertTrue(
+                "Adjusted ($adjusted) should be >= dueAt ($dueAt) for hour=$hour",
+                adjusted >= dueAt,
+            )
+        }
     }
 
     @Test
     fun `adjustToNotifyTime midnight wraps correctly`() {
-        val dueAt = System.currentTimeMillis() + 7L * 24 * 60 * 60 * 1000
-        val adjusted = AlarmScheduler.adjustToNotifyTime(dueAt, 0, 0)
+        // dueAt is 14:30 on Jun 15, preferred 0:00 -> 0:00 on Jun 15 is before 14:30 -> push to Jun 16 0:00
+        val adjusted = AlarmScheduler.adjustToNotifyTime(fixedDueAt(), 0, 0)
         val cal = Calendar.getInstance().apply { timeInMillis = adjusted }
         assertEquals(0, cal.get(Calendar.HOUR_OF_DAY))
         assertEquals(0, cal.get(Calendar.MINUTE))
+        assertEquals(16, cal.get(Calendar.DAY_OF_MONTH))
+    }
+
+    @Test
+    fun `adjustToNotifyTime - exact same time as dueAt stays on same day`() {
+        // dueAt is 14:30, preferred is 14:30 -> equal, not less than -> same day
+        val adjusted = AlarmScheduler.adjustToNotifyTime(fixedDueAt(), 14, 30)
+        val cal = Calendar.getInstance().apply { timeInMillis = adjusted }
+        assertEquals(15, cal.get(Calendar.DAY_OF_MONTH))
+        assertEquals(14, cal.get(Calendar.HOUR_OF_DAY))
+        assertEquals(30, cal.get(Calendar.MINUTE))
     }
 }

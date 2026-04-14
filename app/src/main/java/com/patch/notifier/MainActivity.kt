@@ -142,13 +142,22 @@ class MainActivity : ComponentActivity() {
                         onPatchCountChange = { count ->
                             lifecycleScope.launch(Dispatchers.IO) {
                                 UserPreferences.setPatchCount(appContext, count)
+                                launch(Dispatchers.Main) { autoSelected = false }
                             }
-                            // Re-suggest with new count
-                            autoSelected = false
                         },
                         onNotifyTimeChange = { hour, minute ->
                             lifecycleScope.launch(Dispatchers.IO) {
                                 UserPreferences.setNotifyTime(appContext, hour, minute)
+                                // Reschedule all active alarms with new notify time
+                                val activePatches = dao.getActivePatchesByDueDate()
+                                for (patch in activePatches) {
+                                    val appliedAt = patch.appliedAt ?: continue
+                                    val rawDueAt = appliedAt + PATCH_DURATION_MS
+                                    val newDueAt = AlarmScheduler.adjustToNotifyTime(rawDueAt, hour, minute)
+                                    dao.upsert(patch.copy(dueAt = newDueAt))
+                                    AlarmScheduler.cancelAlarms(appContext, patch.id)
+                                    AlarmScheduler.schedulePatchAlarm(appContext, patch.id, patch.location, newDueAt)
+                                }
                             }
                         },
                     )
