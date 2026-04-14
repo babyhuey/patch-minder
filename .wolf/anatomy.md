@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-04-14T01:11:10.168Z
-> Files: 36 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-04-14T01:25:29.686Z
+> Files: 41 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
 
@@ -26,11 +26,11 @@
 
 ## app/
 
-- `build.gradle.kts` (~617 tok)
+- `build.gradle.kts` (~633 tok)
 
 ## app/src/main/
 
-- `AndroidManifest.xml` (~398 tok)
+- `AndroidManifest.xml` (~509 tok)
 
 ## app/src/main/java/com/patch/notifier/
 
@@ -59,6 +59,12 @@
 - `PatchScreen.kt` — PatchScreen, StatusHeader, LocationGrid, ThighColumn, LocationButton (~4419 tok)
 - `Theme.kt` — PatchTheme (~242 tok)
 
+## app/src/main/java/com/patch/notifier/widget/
+
+- `PatchWidget.kt` — PatchWidget: provideGlance, loadState, PatchWidgetContent (~956 tok)
+- `PatchWidgetReceiver.kt` — Declares PatchWidgetReceiver (~71 tok)
+- `PatchWidgetState.kt` — Data class: WidgetUrgency (~372 tok)
+
 ## app/src/main/res/drawable/
 
 - `ic_launcher_background.xml` (~88 tok)
@@ -71,14 +77,19 @@
 
 ## app/src/main/res/values/
 
-- `strings.xml` (~31 tok)
+- `strings.xml` (~55 tok)
 - `themes.xml` (~43 tok)
+
+## app/src/main/res/xml/
+
+- `patch_widget_info.xml` (~109 tok)
 
 ## app/src/test/java/com/patch/notifier/
 
 - `AlarmReceiverTest.kt` — Declares AlarmReceiverTest (~1015 tok)
 - `AlarmSchedulerTest.kt` — AlarmSchedulerTest: fixedDueAt (~1583 tok)
 - `DisplayUtilsTest.kt` — Declares DisplayUtilsTest (~924 tok)
+- `PatchWidgetStateTest.kt` — Declares PatchWidgetStateTest (~1043 tok)
 - `RotationLogicTest.kt` — Declares RotationLogicTest (~1134 tok)
 
 ## docs/superpowers/plans/
