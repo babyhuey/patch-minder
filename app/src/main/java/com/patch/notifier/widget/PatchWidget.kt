@@ -16,7 +16,6 @@ import androidx.glance.background
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Column
 import androidx.glance.layout.fillMaxSize
-import androidx.glance.layout.padding
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
@@ -72,7 +71,6 @@ private fun PatchWidgetContent(state: PatchWidgetState, context: Context) {
         modifier = GlanceModifier
             .fillMaxSize()
             .background(bgColor)
-            .padding(4.dp)
             .clickable(actionStartActivity(launchIntent)),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalAlignment = Alignment.CenterVertically,
@@ -81,7 +79,7 @@ private fun PatchWidgetContent(state: PatchWidgetState, context: Context) {
             text = state.displayText,
             style = TextStyle(
                 color = accentColor,
-                fontSize = 28.sp,
+                fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
             ),
@@ -90,7 +88,7 @@ private fun PatchWidgetContent(state: PatchWidgetState, context: Context) {
             text = state.subtitleText,
             style = TextStyle(
                 color = subtitleColor,
-                fontSize = 11.sp,
+                fontSize = 10.sp,
                 textAlign = TextAlign.Center,
             ),
         )

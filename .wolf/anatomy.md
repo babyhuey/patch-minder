@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-04-14T01:25:29.686Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-04-14T01:30:52.452Z
 > Files: 41 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
@@ -61,7 +61,7 @@
 
 ## app/src/main/java/com/patch/notifier/widget/
 
-- `PatchWidget.kt` — PatchWidget: provideGlance, loadState, PatchWidgetContent (~956 tok)
+- `PatchWidget.kt` — PatchWidget: provideGlance, loadState, PatchWidgetContent (~938 tok)
 - `PatchWidgetReceiver.kt` — Declares PatchWidgetReceiver (~71 tok)
 - `PatchWidgetState.kt` — Data class: WidgetUrgency (~372 tok)
 
