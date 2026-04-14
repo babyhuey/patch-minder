@@ -35,13 +35,14 @@ class AlarmReceiver : BroadcastReceiver() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val dao = PatchDatabase.getInstance(context).patchDao()
-                val patch = dao.getAll().find { it.id == patchId }
+                val patch = dao.getById(patchId)
 
-                // If patch was already replaced (dueAt is in the future), stop nagging
+                // If patch was replaced recently (dueAt is well into the future), stop nagging.
+                // Use a 60-second tolerance so the primary alarm isn't suppressed if it fires
+                // a few ms before the exact dueAt.
                 if (patch != null && patch.dueAt != null) {
                     val now = System.currentTimeMillis()
-                    if (patch.dueAt > now) {
-                        // Patch has a future due date — it's been replaced, stop nagging
+                    if (patch.dueAt > now + 60_000) {
                         return@launch
                     }
                 }

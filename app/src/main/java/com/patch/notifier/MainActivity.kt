@@ -41,6 +41,10 @@ class MainActivity : ComponentActivity() {
         ActivityResultContracts.RequestPermission(),
     ) { /* granted or not, app still works */ }
 
+    // Mutable state so onNewIntent can trigger recomposition
+    private val duePatchIds = mutableStateOf<Set<Int>?>(null)
+    private val hasAutoSelected = mutableStateOf(false)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -59,11 +63,11 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        // Read initial intent extras
+        duePatchIds.value = intent?.getIntArrayExtra(EXTRA_DUE_PATCH_IDS)?.toSet()
+
         val db = PatchDatabase.getInstance(this)
         val dao = db.patchDao()
-
-        // Patch IDs from notification tap (pre-select overdue patches)
-        val duePatchIds = intent?.getIntArrayExtra(EXTRA_DUE_PATCH_IDS)?.toSet()
 
         setContent {
             PatchTheme {
@@ -73,18 +77,20 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val patches by dao.observeAll().collectAsState(initial = emptyList())
                     var selectedIds by remember { mutableStateOf<Set<Int>>(emptySet()) }
-                    var hasAutoSelected by remember { mutableStateOf(false) }
+                    var autoSelected by hasAutoSelected
                     var showConfirmation by remember { mutableStateOf(false) }
 
-                    // Auto-select on first load or after confirm resets
-                    LaunchedEffect(patches, hasAutoSelected) {
-                        if (patches.isNotEmpty() && !hasAutoSelected) {
-                            selectedIds = if (duePatchIds != null && duePatchIds.isNotEmpty()) {
-                                duePatchIds
+                    // Auto-select on first load, after confirm, or after notification tap
+                    LaunchedEffect(patches, autoSelected) {
+                        if (patches.isNotEmpty() && !autoSelected) {
+                            val fromNotification = duePatchIds.value
+                            selectedIds = if (fromNotification != null && fromNotification.isNotEmpty()) {
+                                duePatchIds.value = null // consume it
+                                fromNotification
                             } else {
                                 suggestLocations(patches).toSet()
                             }
-                            hasAutoSelected = true
+                            autoSelected = true
                         }
                     }
 
@@ -123,13 +129,23 @@ class MainActivity : ComponentActivity() {
                             lifecycleScope.launch {
                                 delay(1500)
                                 showConfirmation = false
-                                hasAutoSelected = false // triggers re-suggestion
+                                autoSelected = false
                             }
                         },
                         showConfirmation = showConfirmation,
                     )
                 }
             }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        val ids = intent.getIntArrayExtra(EXTRA_DUE_PATCH_IDS)?.toSet()
+        if (ids != null && ids.isNotEmpty()) {
+            duePatchIds.value = ids
+            hasAutoSelected.value = false // triggers re-selection with notification IDs
         }
     }
 }

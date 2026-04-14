@@ -19,6 +19,9 @@ interface PatchDao {
     @Upsert
     suspend fun upsertAll(patches: List<Patch>)
 
+    @Query("SELECT * FROM patches WHERE id = :id")
+    suspend fun getById(id: Int): Patch?
+
     @Query("SELECT * FROM patches WHERE dueAt IS NOT NULL AND dueAt > 0 ORDER BY dueAt")
     suspend fun getActivePatchesByDueDate(): List<Patch>
 }
