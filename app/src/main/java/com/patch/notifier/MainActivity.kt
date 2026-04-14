@@ -28,6 +28,7 @@ import com.patch.notifier.data.PatchPreferences
 import com.patch.notifier.data.UserPreferences
 import com.patch.notifier.data.suggestLocations
 import com.patch.notifier.ui.Navy
+import com.patch.notifier.widget.PatchWidgetReceiver
 import com.patch.notifier.ui.PatchScreen
 import com.patch.notifier.ui.PatchTheme
 import kotlinx.coroutines.Dispatchers
@@ -131,6 +132,7 @@ class MainActivity : ComponentActivity() {
                                             context, id, patch.location, dueAt,
                                         )
                                     }
+                                    PatchWidgetReceiver.updateAllWidgets(context)
                                 } catch (e: Exception) {
                                     Log.e("MainActivity", "Failed to save patch replacement", e)
                                     launch(Dispatchers.Main) {

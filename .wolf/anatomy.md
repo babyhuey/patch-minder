@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-04-14T01:30:52.452Z
-> Files: 41 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-04-14T01:42:59.477Z
+> Files: 44 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
 
@@ -26,7 +26,7 @@
 
 ## app/
 
-- `build.gradle.kts` (~633 tok)
+- `build.gradle.kts` (~617 tok)
 
 ## app/src/main/
 
@@ -34,7 +34,7 @@
 
 ## app/src/main/java/com/patch/notifier/
 
-- `MainActivity.kt` — MainActivity: onCreate, onNewIntent (~2300 tok)
+- `MainActivity.kt` — MainActivity: onCreate, onNewIntent (~2336 tok)
 - `PatchApp.kt` — PatchApp: onCreate (~256 tok)
 
 ## app/src/main/java/com/patch/notifier/alarm/
@@ -61,14 +61,20 @@
 
 ## app/src/main/java/com/patch/notifier/widget/
 
-- `PatchWidget.kt` — PatchWidget: provideGlance, loadState, PatchWidgetContent (~938 tok)
-- `PatchWidgetReceiver.kt` — Declares PatchWidgetReceiver (~71 tok)
+- `PatchWidget.kt` — PatchWidget: provideGlance, loadState, PatchWidgetContent (~959 tok)
+- `PatchWidgetReceiver.kt` — PatchWidgetReceiver: onUpdate, updateAllWidgets, loadState, updateWidget (~965 tok)
 - `PatchWidgetState.kt` — Data class: WidgetUrgency (~372 tok)
 
 ## app/src/main/res/drawable/
 
 - `ic_launcher_background.xml` (~88 tok)
 - `ic_launcher_foreground.xml` (~471 tok)
+- `widget_background.xml` (~59 tok)
+
+## app/src/main/res/layout/
+
+- `widget_loading.xml` (~138 tok)
+- `widget_patch.xml` (~301 tok)
 
 ## app/src/main/res/mipmap-anydpi-v26/
 
@@ -82,7 +88,7 @@
 
 ## app/src/main/res/xml/
 
-- `patch_widget_info.xml` (~109 tok)
+- `patch_widget_info.xml` (~135 tok)
 
 ## app/src/test/java/com/patch/notifier/
 
