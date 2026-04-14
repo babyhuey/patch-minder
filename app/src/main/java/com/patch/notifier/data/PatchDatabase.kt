@@ -19,32 +19,26 @@ abstract class PatchDatabase : RoomDatabase() {
 
         fun getInstance(context: Context): PatchDatabase {
             return INSTANCE ?: synchronized(this) {
-                INSTANCE ?: buildDatabase(context).also { INSTANCE = it }
+                INSTANCE ?: Room.databaseBuilder(
+                    context.applicationContext,
+                    PatchDatabase::class.java,
+                    "patch_db",
+                )
+                    .addCallback(SeedCallback(context))
+                    .build()
+                    .also { INSTANCE = it }
             }
         }
+    }
+}
 
-        private fun buildDatabase(context: Context): PatchDatabase {
-            return Room.databaseBuilder(
-                context.applicationContext,
-                PatchDatabase::class.java,
-                "patch_db",
-            )
-                .addCallback(object : Callback() {
-                    override fun onCreate(db: SupportSQLiteDatabase) {
-                        super.onCreate(db)
-                        CoroutineScope(Dispatchers.IO).launch {
-                            INSTANCE?.patchDao()?.upsertAll(
-                                listOf(
-                                    Patch(1, "Left Upper", null, null),
-                                    Patch(2, "Left Lower", null, null),
-                                    Patch(3, "Right Upper", null, null),
-                                    Patch(4, "Right Lower", null, null),
-                                )
-                            )
-                        }
-                    }
-                })
-                .build()
-        }
+private class SeedCallback(private val context: Context) : RoomDatabase.Callback() {
+    override fun onCreate(db: SupportSQLiteDatabase) {
+        super.onCreate(db)
+        // Insert seed data directly via SQL to avoid any INSTANCE timing issues
+        db.execSQL("INSERT OR IGNORE INTO patches (id, location, appliedAt, dueAt) VALUES (1, 'Left Upper', NULL, NULL)")
+        db.execSQL("INSERT OR IGNORE INTO patches (id, location, appliedAt, dueAt) VALUES (2, 'Left Lower', NULL, NULL)")
+        db.execSQL("INSERT OR IGNORE INTO patches (id, location, appliedAt, dueAt) VALUES (3, 'Right Upper', NULL, NULL)")
+        db.execSQL("INSERT OR IGNORE INTO patches (id, location, appliedAt, dueAt) VALUES (4, 'Right Lower', NULL, NULL)")
     }
 }
