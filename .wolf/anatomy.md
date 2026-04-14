@@ -1,7 +1,13 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-04-14T01:58:58.172Z
-> Files: 44 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-04-14T02:09:50.575Z
+> Files: 48 tracked | Anatomy hits: 0 | Misses: 0
+
+## ../../.claude/projects/-home-jlyons-PycharmProjects-patch-notifier/memory/
+
+- `feedback_build_deploy.md` (~275 tok)
+- `MEMORY.md` (~57 tok)
+- `user_profile.md` (~154 tok)
 
 ## ./
 
@@ -10,6 +16,7 @@
 - `docker-build.sh` (~112 tok)
 - `Dockerfile` — Docker container definition (~81 tok)
 - `gradle.properties` (~37 tok)
+- `SESSION-NOTES.md` — Patch Notifier — Session Notes (2026-04-13) (~1184 tok)
 - `settings.gradle.kts` (~89 tok)
 
 ## .superpowers/brainstorm/45504-1776115036/content/
@@ -34,7 +41,7 @@
 
 ## app/src/main/java/com/patch/notifier/
 
-- `MainActivity.kt` — MainActivity: onCreate, onNewIntent (~2606 tok)
+- `MainActivity.kt` — MainActivity: onCreate, onNewIntent (~2666 tok)
 - `PatchApp.kt` — PatchApp: onCreate (~256 tok)
 
 ## app/src/main/java/com/patch/notifier/alarm/
@@ -62,7 +69,7 @@
 ## app/src/main/java/com/patch/notifier/widget/
 
 - `PatchWidget.kt` — PatchWidget: provideGlance, loadState, PatchWidgetContent (~959 tok)
-- `PatchWidgetReceiver.kt` — PatchWidgetReceiver: onUpdate, updateAllWidgets, loadState, updateWidget (~992 tok)
+- `PatchWidgetReceiver.kt` — PatchWidgetReceiver: onUpdate, updateAllWidgets, loadState, updateWidget (~1014 tok)
 - `PatchWidgetState.kt` — Data class: WidgetUrgency (~372 tok)
 
 ## app/src/main/res/drawable/

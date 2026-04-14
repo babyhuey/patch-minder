@@ -169,8 +169,12 @@ class MainActivity : ComponentActivity() {
                         preferences = prefs,
                         onPatchCountChange = { count ->
                             lifecycleScope.launch(Dispatchers.IO) {
-                                UserPreferences.setPatchCount(appContext, count)
-                                launch(Dispatchers.Main) { autoSelected = false }
+                                try {
+                                    UserPreferences.setPatchCount(appContext, count)
+                                    launch(Dispatchers.Main) { autoSelected = false }
+                                } catch (e: Exception) {
+                                    Log.e("MainActivity", "Failed to save patch count", e)
+                                }
                             }
                         },
                         onNotifyTimeChange = { hour, minute ->

@@ -33,7 +33,7 @@ class RotationLogicTest {
         )
         val suggested = suggestLocations(patches)
         assertEquals(3, suggested.size)
-        assert(4 in suggested) { "Should suggest the unused location" }
+        assertTrue("Should suggest the unused location", 4 in suggested)
     }
 
     @Test

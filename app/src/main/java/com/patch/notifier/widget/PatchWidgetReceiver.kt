@@ -63,7 +63,8 @@ class PatchWidgetReceiver : AppWidgetProvider() {
                 val now = System.currentTimeMillis()
                 val earliest = patches.firstOrNull()?.dueAt
                 computeWidgetState(earliest, patches.size, now)
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                Log.e("PatchWidget", "Failed to load widget state from database", e)
                 PatchWidgetState(null, 0)
             }
         }
