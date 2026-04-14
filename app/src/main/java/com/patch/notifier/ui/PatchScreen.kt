@@ -220,16 +220,30 @@ private fun LocationButton(
     dueAt: Long?,
     onClick: () -> Unit,
 ) {
+    val hasActivePatch = dueAt != null && dueAt > 0
+
     val backgroundColor by animateColorAsState(
-        targetValue = if (selected) Blue else Navy,
+        targetValue = when {
+            selected -> Blue
+            hasActivePatch -> Color(0xFF1E2A5E) // subtle blue tint for active
+            else -> Navy
+        },
         label = "bg",
     )
     val borderColor by animateColorAsState(
-        targetValue = if (selected) BlueBright else BorderColor,
+        targetValue = when {
+            selected -> BlueBright
+            hasActivePatch -> Color(0xFF3A4A8A) // soft blue border for active
+            else -> BorderColor
+        },
         label = "border",
     )
     val textColor by animateColorAsState(
-        targetValue = if (selected) TextPrimary else TextMuted,
+        targetValue = when {
+            selected -> TextPrimary
+            hasActivePatch -> TextSecondary
+            else -> TextMuted
+        },
         label = "text",
     )
 
@@ -258,7 +272,11 @@ private fun LocationButton(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
-                text = if (selected) "✓ $label" else label,
+                text = when {
+                    selected -> "✓ $label"
+                    hasActivePatch -> "● $label"
+                    else -> label
+                },
                 color = textColor,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 15.sp,
@@ -267,7 +285,11 @@ private fun LocationButton(
             if (daysLeftText != null) {
                 Text(
                     text = daysLeftText,
-                    color = if (daysLeftText.contains("overdue")) Color(0xFFEF4444) else TextMuted,
+                    color = when {
+                        daysLeftText.contains("overdue") -> Color(0xFFEF4444)
+                        daysLeftText.contains("due today") -> Color(0xFFF59E0B)
+                        else -> TextMuted
+                    },
                     fontSize = 11.sp,
                     textAlign = TextAlign.Center,
                 )
