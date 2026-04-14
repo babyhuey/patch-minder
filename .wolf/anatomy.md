@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-04-14T00:23:50.148Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-04-14T00:40:25.958Z
 > Files: 32 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
@@ -30,16 +30,16 @@
 
 ## app/src/main/
 
-- `AndroidManifest.xml` (~379 tok)
+- `AndroidManifest.xml` (~398 tok)
 
 ## app/src/main/java/com/patch/notifier/
 
-- `MainActivity.kt` — MainActivity: onCreate (~1332 tok)
+- `MainActivity.kt` — MainActivity: onCreate, onNewIntent (~1656 tok)
 - `PatchApp.kt` — PatchApp: onCreate (~256 tok)
 
 ## app/src/main/java/com/patch/notifier/alarm/
 
-- `AlarmReceiver.kt` — AlarmReceiver: onReceive, showNotification (~654 tok)
+- `AlarmReceiver.kt` — AlarmReceiver: onReceive, showNotification (~1201 tok)
 - `AlarmScheduler.kt` — patchAlarmRequestCode, nagAlarmRequestCode, nagDelayMs, canScheduleExact, scheduleAlarm (~1030 tok)
 
 ## app/src/main/java/com/patch/notifier/boot/
@@ -48,13 +48,13 @@
 
 ## app/src/main/java/com/patch/notifier/data/
 
-- `Patch.kt` — Data class: Patch (~114 tok)
-- `PatchDao.kt` — observeAll, getAll, upsert, upsertAll, getActivePatchesByDueDate (~163 tok)
+- `Patch.kt` — Data class: Patch (~149 tok)
+- `PatchDao.kt` — observeAll, getAll, upsert, upsertAll, getById (~188 tok)
 - `PatchDatabase.kt` — PatchDatabase: patchDao, getInstance, onCreate (~476 tok)
 
 ## app/src/main/java/com/patch/notifier/ui/
 
-- `PatchScreen.kt` — PatchScreen, StatusHeader, LocationGrid, ThighColumn, LocationButton (~2451 tok)
+- `PatchScreen.kt` — PatchScreen, StatusHeader, LocationGrid, ThighColumn, LocationButton (~2579 tok)
 - `Theme.kt` — PatchTheme (~242 tok)
 
 ## app/src/main/res/drawable/
@@ -75,7 +75,7 @@
 ## app/src/test/java/com/patch/notifier/
 
 - `AlarmSchedulerTest.kt` — Declares AlarmSchedulerTest (~232 tok)
-- `RotationLogicTest.kt` — Declares RotationLogicTest (~576 tok)
+- `RotationLogicTest.kt` — Declares RotationLogicTest (~939 tok)
 
 ## docs/superpowers/plans/
 
