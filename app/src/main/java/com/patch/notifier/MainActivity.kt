@@ -1,9 +1,12 @@
 package com.patch.notifier
 
 import android.Manifest
+import android.app.AlarmManager
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -44,6 +47,14 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        // Request exact alarm permission on Android 12+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val alarmManager = getSystemService(AlarmManager::class.java)
+            if (!alarmManager.canScheduleExactAlarms()) {
+                startActivity(Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM))
+            }
+        }
+
         val db = PatchDatabase.getInstance(this)
         val dao = db.patchDao()
 
@@ -79,9 +90,13 @@ class MainActivity : ComponentActivity() {
                             val now = System.currentTimeMillis()
                             val dueAt = now + 7 * 24 * 60 * 60 * 1000L
                             val context = this@MainActivity
+                            val idsToReplace = selectedIds.toSet()
+
+                            selectedIds = emptySet()
+                            showConfirmation = true
 
                             CoroutineScope(Dispatchers.IO).launch {
-                                for (id in selectedIds) {
+                                for (id in idsToReplace) {
                                     val patch = patches.find { it.id == id } ?: continue
                                     val updated = patch.copy(appliedAt = now, dueAt = dueAt)
                                     dao.upsert(updated)
@@ -93,8 +108,6 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
 
-                            selectedIds = emptySet()
-                            showConfirmation = true
                             CoroutineScope(Dispatchers.Main).launch {
                                 delay(1500)
                                 showConfirmation = false

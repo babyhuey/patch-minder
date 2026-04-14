@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-04-13T23:06:33.667Z
-> Files: 28 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-04-14T00:23:50.148Z
+> Files: 32 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
 
@@ -26,21 +26,21 @@
 
 ## app/
 
-- `build.gradle.kts` (~507 tok)
+- `build.gradle.kts` (~598 tok)
 
 ## app/src/main/
 
-- `AndroidManifest.xml` (~353 tok)
+- `AndroidManifest.xml` (~379 tok)
 
 ## app/src/main/java/com/patch/notifier/
 
-- `MainActivity.kt` — MainActivity: onCreate (~1204 tok)
+- `MainActivity.kt` — MainActivity: onCreate (~1332 tok)
 - `PatchApp.kt` — PatchApp: onCreate (~256 tok)
 
 ## app/src/main/java/com/patch/notifier/alarm/
 
 - `AlarmReceiver.kt` — AlarmReceiver: onReceive, showNotification (~654 tok)
-- `AlarmScheduler.kt` — patchAlarmRequestCode, nagAlarmRequestCode, nagDelayMs, schedulePatchAlarm, scheduleNagAlarm (~904 tok)
+- `AlarmScheduler.kt` — patchAlarmRequestCode, nagAlarmRequestCode, nagDelayMs, canScheduleExact, scheduleAlarm (~1030 tok)
 
 ## app/src/main/java/com/patch/notifier/boot/
 
@@ -50,12 +50,22 @@
 
 - `Patch.kt` — Data class: Patch (~114 tok)
 - `PatchDao.kt` — observeAll, getAll, upsert, upsertAll, getActivePatchesByDueDate (~163 tok)
-- `PatchDatabase.kt` — PatchDatabase: patchDao, getInstance, buildDatabase, onCreate (~483 tok)
+- `PatchDatabase.kt` — PatchDatabase: patchDao, getInstance, onCreate (~476 tok)
 
 ## app/src/main/java/com/patch/notifier/ui/
 
-- `PatchScreen.kt` — PatchScreen, StatusHeader, LocationGrid, ThighColumn, LocationButton (~2079 tok)
+- `PatchScreen.kt` — PatchScreen, StatusHeader, LocationGrid, ThighColumn, LocationButton (~2451 tok)
 - `Theme.kt` — PatchTheme (~242 tok)
+
+## app/src/main/res/drawable/
+
+- `ic_launcher_background.xml` (~88 tok)
+- `ic_launcher_foreground.xml` (~471 tok)
+
+## app/src/main/res/mipmap-anydpi-v26/
+
+- `ic_launcher_round.xml` (~73 tok)
+- `ic_launcher.xml` (~73 tok)
 
 ## app/src/main/res/values/
 

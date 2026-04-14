@@ -4,6 +4,7 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 
 object AlarmScheduler {
     private const val PATCH_ALARM_BASE = 1000
@@ -24,8 +25,40 @@ object AlarmScheduler {
         return if (nagCount == 0) FIRST_NAG_DELAY_MS else REPEAT_NAG_DELAY_MS
     }
 
-    fun schedulePatchAlarm(context: Context, patchId: Int, location: String, triggerAtMs: Long) {
+    private fun canScheduleExact(context: Context): Boolean {
         val alarmManager = context.getSystemService(AlarmManager::class.java)
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            alarmManager.canScheduleExactAlarms()
+        } else {
+            true
+        }
+    }
+
+    private fun scheduleAlarm(context: Context, requestCode: Int, intent: Intent, triggerAtMs: Long) {
+        val alarmManager = context.getSystemService(AlarmManager::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            requestCode,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+        if (canScheduleExact(context)) {
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                triggerAtMs,
+                pendingIntent,
+            )
+        } else {
+            // Fallback to inexact alarm — still fires, just not at the exact ms
+            alarmManager.setAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                triggerAtMs,
+                pendingIntent,
+            )
+        }
+    }
+
+    fun schedulePatchAlarm(context: Context, patchId: Int, location: String, triggerAtMs: Long) {
         val intent = Intent(context, AlarmReceiver::class.java).apply {
             action = ACTION_PATCH_DUE
             putExtra(EXTRA_PATCH_ID, patchId)
@@ -33,21 +66,10 @@ object AlarmScheduler {
             putExtra(EXTRA_IS_NAG, false)
             putExtra(EXTRA_NAG_COUNT, 0)
         }
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            patchAlarmRequestCode(patchId),
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-        )
-        alarmManager.setExactAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP,
-            triggerAtMs,
-            pendingIntent,
-        )
+        scheduleAlarm(context, patchAlarmRequestCode(patchId), intent, triggerAtMs)
     }
 
     fun scheduleNagAlarm(context: Context, patchId: Int, location: String, nagCount: Int) {
-        val alarmManager = context.getSystemService(AlarmManager::class.java)
         val triggerAt = System.currentTimeMillis() + nagDelayMs(nagCount)
         val intent = Intent(context, AlarmReceiver::class.java).apply {
             action = ACTION_PATCH_DUE
@@ -56,17 +78,7 @@ object AlarmScheduler {
             putExtra(EXTRA_IS_NAG, true)
             putExtra(EXTRA_NAG_COUNT, nagCount + 1)
         }
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            nagAlarmRequestCode(patchId),
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-        )
-        alarmManager.setExactAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP,
-            triggerAt,
-            pendingIntent,
-        )
+        scheduleAlarm(context, nagAlarmRequestCode(patchId), intent, triggerAt)
     }
 
     fun cancelAlarms(context: Context, patchId: Int) {
