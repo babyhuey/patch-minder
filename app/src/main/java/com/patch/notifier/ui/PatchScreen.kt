@@ -1,6 +1,7 @@
 package com.patch.notifier.ui
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -336,6 +337,15 @@ private fun SettingsSection(
     var expanded by remember { mutableStateOf(false) }
     var showResetConfirm by remember { mutableStateOf(false) }
     val haptic = LocalHapticFeedback.current
+
+    // Auto-dismiss reset confirmation after 3 seconds
+    LaunchedEffect(showResetConfirm) {
+        if (showResetConfirm) {
+            @Suppress("RemoveRedundantQualifierName")
+            kotlinx.coroutines.delay(3000L)
+            showResetConfirm = false
+        }
+    }
 
     Column(
         modifier = Modifier.fillMaxWidth(),

@@ -21,6 +21,7 @@ class PatchWidgetReceiver : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray,
     ) {
+        val pendingResult = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val state = loadState(context)
@@ -29,6 +30,8 @@ class PatchWidgetReceiver : AppWidgetProvider() {
                 }
             } catch (e: Exception) {
                 Log.e("PatchWidget", "Failed to update widget", e)
+            } finally {
+                pendingResult.finish()
             }
         }
     }

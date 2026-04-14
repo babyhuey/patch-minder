@@ -110,6 +110,7 @@ class MainActivity : ComponentActivity() {
                         },
                         onReset = {
                             val context = this@MainActivity
+                            selectedIds = emptySet()
                             lifecycleScope.launch(Dispatchers.IO) {
                                 try {
                                     val allPatches = dao.getAll()
@@ -118,10 +119,10 @@ class MainActivity : ComponentActivity() {
                                         AlarmScheduler.cancelAlarms(context, patch.id)
                                     }
                                     PatchWidgetReceiver.updateAllWidgets(context)
+                                    launch(Dispatchers.Main) { autoSelected = false }
                                 } catch (e: Exception) {
                                     Log.e("MainActivity", "Failed to reset patches", e)
                                 }
-                                launch(Dispatchers.Main) { autoSelected = false }
                             }
                         },
                         onConfirm = {

@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-04-14T01:53:19.058Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-04-14T01:58:58.172Z
 > Files: 44 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
@@ -34,7 +34,7 @@
 
 ## app/src/main/java/com/patch/notifier/
 
-- `MainActivity.kt` — MainActivity: onCreate, onNewIntent (~2590 tok)
+- `MainActivity.kt` — MainActivity: onCreate, onNewIntent (~2606 tok)
 - `PatchApp.kt` — PatchApp: onCreate (~256 tok)
 
 ## app/src/main/java/com/patch/notifier/alarm/
@@ -56,13 +56,13 @@
 ## app/src/main/java/com/patch/notifier/ui/
 
 - `DisplayUtils.kt` — Data class: StatusInfo (~312 tok)
-- `PatchScreen.kt` — PatchScreen, StatusHeader, LocationGrid, ThighColumn, LocationButton (~4722 tok)
+- `PatchScreen.kt` — PatchScreen, StatusHeader, LocationGrid, ThighColumn, LocationButton (~4808 tok)
 - `Theme.kt` — PatchTheme (~242 tok)
 
 ## app/src/main/java/com/patch/notifier/widget/
 
 - `PatchWidget.kt` — PatchWidget: provideGlance, loadState, PatchWidgetContent (~959 tok)
-- `PatchWidgetReceiver.kt` — PatchWidgetReceiver: onUpdate, updateAllWidgets, loadState, updateWidget (~965 tok)
+- `PatchWidgetReceiver.kt` — PatchWidgetReceiver: onUpdate, updateAllWidgets, loadState, updateWidget (~992 tok)
 - `PatchWidgetState.kt` — Data class: WidgetUrgency (~372 tok)
 
 ## app/src/main/res/drawable/
