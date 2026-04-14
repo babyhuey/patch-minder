@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import java.util.Calendar
 
 object AlarmScheduler {
     private const val PATCH_ALARM_BASE = 1000
@@ -56,6 +57,28 @@ object AlarmScheduler {
                 pendingIntent,
             )
         }
+    }
+
+    /**
+     * Adjusts a raw dueAt timestamp to fire at the preferred notification time on that day.
+     * If the preferred time has already passed on the due day, fires at the preferred time
+     * the next day.
+     */
+    fun adjustToNotifyTime(dueAtMs: Long, hour: Int, minute: Int): Long {
+        val cal = Calendar.getInstance().apply {
+            timeInMillis = dueAtMs
+            set(Calendar.HOUR_OF_DAY, hour)
+            set(Calendar.MINUTE, minute)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        // If preferred time on due day is before the actual due time,
+        // the patch isn't due yet at that hour — use the same day.
+        // If preferred time is after now, use it. Otherwise next day.
+        if (cal.timeInMillis < System.currentTimeMillis()) {
+            cal.add(Calendar.DAY_OF_MONTH, 1)
+        }
+        return cal.timeInMillis
     }
 
     fun schedulePatchAlarm(context: Context, patchId: Int, location: String, triggerAtMs: Long) {

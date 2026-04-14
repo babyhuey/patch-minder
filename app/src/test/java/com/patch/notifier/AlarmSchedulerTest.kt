@@ -3,7 +3,9 @@ package com.patch.notifier
 import com.patch.notifier.alarm.AlarmScheduler
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.util.Calendar
 
 class AlarmSchedulerTest {
 
@@ -81,5 +83,33 @@ class AlarmSchedulerTest {
     @Test
     fun `repeat nag delay is exactly 2 hours in ms`() {
         assertEquals(2 * 60 * 60 * 1000L, AlarmScheduler.nagDelayMs(1))
+    }
+
+    // --- adjustToNotifyTime ---
+
+    @Test
+    fun `adjustToNotifyTime sets correct hour and minute`() {
+        val dueAt = System.currentTimeMillis() + 7L * 24 * 60 * 60 * 1000
+        val adjusted = AlarmScheduler.adjustToNotifyTime(dueAt, 9, 30)
+        val cal = Calendar.getInstance().apply { timeInMillis = adjusted }
+        assertEquals(9, cal.get(Calendar.HOUR_OF_DAY))
+        assertEquals(30, cal.get(Calendar.MINUTE))
+        assertEquals(0, cal.get(Calendar.SECOND))
+    }
+
+    @Test
+    fun `adjustToNotifyTime result is in the future`() {
+        val dueAt = System.currentTimeMillis() + 7L * 24 * 60 * 60 * 1000
+        val adjusted = AlarmScheduler.adjustToNotifyTime(dueAt, 9, 0)
+        assertTrue("Adjusted time should be in the future", adjusted > System.currentTimeMillis())
+    }
+
+    @Test
+    fun `adjustToNotifyTime midnight wraps correctly`() {
+        val dueAt = System.currentTimeMillis() + 7L * 24 * 60 * 60 * 1000
+        val adjusted = AlarmScheduler.adjustToNotifyTime(dueAt, 0, 0)
+        val cal = Calendar.getInstance().apply { timeInMillis = adjusted }
+        assertEquals(0, cal.get(Calendar.HOUR_OF_DAY))
+        assertEquals(0, cal.get(Calendar.MINUTE))
     }
 }

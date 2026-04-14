@@ -23,6 +23,8 @@ import androidx.lifecycle.lifecycleScope
 import com.patch.notifier.alarm.AlarmScheduler
 import com.patch.notifier.data.PATCH_DURATION_MS
 import com.patch.notifier.data.PatchDatabase
+import com.patch.notifier.data.PatchPreferences
+import com.patch.notifier.data.UserPreferences
 import com.patch.notifier.data.suggestLocations
 import com.patch.notifier.ui.Navy
 import com.patch.notifier.ui.PatchScreen
@@ -41,7 +43,6 @@ class MainActivity : ComponentActivity() {
         ActivityResultContracts.RequestPermission(),
     ) { /* granted or not, app still works */ }
 
-    // Mutable state so onNewIntent can trigger recomposition
     private val duePatchIds = mutableStateOf<Set<Int>?>(null)
     private val hasAutoSelected = mutableStateOf(false)
 
@@ -63,11 +64,11 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // Read initial intent extras
         duePatchIds.value = intent?.getIntArrayExtra(EXTRA_DUE_PATCH_IDS)?.toSet()
 
         val db = PatchDatabase.getInstance(this)
         val dao = db.patchDao()
+        val appContext = applicationContext
 
         setContent {
             PatchTheme {
@@ -76,19 +77,20 @@ class MainActivity : ComponentActivity() {
                     color = Navy,
                 ) {
                     val patches by dao.observeAll().collectAsState(initial = emptyList())
+                    val prefs by UserPreferences.observe(appContext)
+                        .collectAsState(initial = PatchPreferences())
                     var selectedIds by remember { mutableStateOf<Set<Int>>(emptySet()) }
                     var autoSelected by hasAutoSelected
                     var showConfirmation by remember { mutableStateOf(false) }
 
-                    // Auto-select on first load, after confirm, or after notification tap
                     LaunchedEffect(patches, autoSelected) {
                         if (patches.isNotEmpty() && !autoSelected) {
                             val fromNotification = duePatchIds.value
                             selectedIds = if (fromNotification != null && fromNotification.isNotEmpty()) {
-                                duePatchIds.value = null // consume it
+                                duePatchIds.value = null
                                 fromNotification
                             } else {
-                                suggestLocations(patches).toSet()
+                                suggestLocations(patches, prefs.patchCount).toSet()
                             }
                             autoSelected = true
                         }
@@ -106,7 +108,10 @@ class MainActivity : ComponentActivity() {
                         },
                         onConfirm = {
                             val now = System.currentTimeMillis()
-                            val dueAt = now + PATCH_DURATION_MS
+                            val rawDueAt = now + PATCH_DURATION_MS
+                            val dueAt = AlarmScheduler.adjustToNotifyTime(
+                                rawDueAt, prefs.notifyHour, prefs.notifyMinute,
+                            )
                             val context = this@MainActivity
                             val idsToReplace = selectedIds.toSet()
                             val currentPatches = patches.toList()
@@ -133,6 +138,19 @@ class MainActivity : ComponentActivity() {
                             }
                         },
                         showConfirmation = showConfirmation,
+                        preferences = prefs,
+                        onPatchCountChange = { count ->
+                            lifecycleScope.launch(Dispatchers.IO) {
+                                UserPreferences.setPatchCount(appContext, count)
+                            }
+                            // Re-suggest with new count
+                            autoSelected = false
+                        },
+                        onNotifyTimeChange = { hour, minute ->
+                            lifecycleScope.launch(Dispatchers.IO) {
+                                UserPreferences.setNotifyTime(appContext, hour, minute)
+                            }
+                        },
                     )
                 }
             }
@@ -145,7 +163,7 @@ class MainActivity : ComponentActivity() {
         val ids = intent.getIntArrayExtra(EXTRA_DUE_PATCH_IDS)?.toSet()
         if (ids != null && ids.isNotEmpty()) {
             duePatchIds.value = ids
-            hasAutoSelected.value = false // triggers re-selection with notification IDs
+            hasAutoSelected.value = false
         }
     }
 }

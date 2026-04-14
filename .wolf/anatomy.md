@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-04-14T00:51:22.104Z
-> Files: 35 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-04-14T00:57:05.133Z
+> Files: 36 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
 
@@ -26,7 +26,7 @@
 
 ## app/
 
-- `build.gradle.kts` (~598 tok)
+- `build.gradle.kts` (~617 tok)
 
 ## app/src/main/
 
@@ -34,13 +34,13 @@
 
 ## app/src/main/java/com/patch/notifier/
 
-- `MainActivity.kt` — MainActivity: onCreate, onNewIntent (~1656 tok)
+- `MainActivity.kt` — MainActivity: onCreate, onNewIntent (~1901 tok)
 - `PatchApp.kt` — PatchApp: onCreate (~256 tok)
 
 ## app/src/main/java/com/patch/notifier/alarm/
 
 - `AlarmReceiver.kt` — Returns true if the patch was recently replaced and nag should be suppressed. (~1298 tok)
-- `AlarmScheduler.kt` — patchAlarmRequestCode, nagAlarmRequestCode, nagDelayMs, canScheduleExact, scheduleAlarm (~1030 tok)
+- `AlarmScheduler.kt` — Adjusts a raw dueAt timestamp to fire at the preferred notification time on that day. (~1281 tok)
 
 ## app/src/main/java/com/patch/notifier/boot/
 
@@ -51,11 +51,12 @@
 - `Patch.kt` — Data class: Patch (~165 tok)
 - `PatchDao.kt` — observeAll, getAll, upsert, upsertAll, getById (~188 tok)
 - `PatchDatabase.kt` — PatchDatabase: patchDao, getInstance, onCreate (~476 tok)
+- `UserPreferences.kt` — Data class: PatchPreferences (~414 tok)
 
 ## app/src/main/java/com/patch/notifier/ui/
 
 - `DisplayUtils.kt` — Data class: StatusInfo (~292 tok)
-- `PatchScreen.kt` — PatchScreen, StatusHeader, LocationGrid, ThighColumn, LocationButton (~2409 tok)
+- `PatchScreen.kt` — PatchScreen, StatusHeader, LocationGrid, ThighColumn, LocationButton (~4419 tok)
 - `Theme.kt` — PatchTheme (~242 tok)
 
 ## app/src/main/res/drawable/
@@ -76,7 +77,7 @@
 ## app/src/test/java/com/patch/notifier/
 
 - `AlarmReceiverTest.kt` — Declares AlarmReceiverTest (~1015 tok)
-- `AlarmSchedulerTest.kt` — Declares AlarmSchedulerTest (~759 tok)
+- `AlarmSchedulerTest.kt` — Declares AlarmSchedulerTest (~1097 tok)
 - `DisplayUtilsTest.kt` — Declares DisplayUtilsTest (~926 tok)
 - `RotationLogicTest.kt` — Declares RotationLogicTest (~1134 tok)
 
