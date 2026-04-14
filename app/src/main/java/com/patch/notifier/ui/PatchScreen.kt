@@ -51,6 +51,7 @@ fun PatchScreen(
     selectedIds: Set<Int>,
     onToggle: (Int) -> Unit,
     onConfirm: () -> Unit,
+    onReset: () -> Unit,
     showConfirmation: Boolean,
     preferences: PatchPreferences,
     onPatchCountChange: (Int) -> Unit,
@@ -119,6 +120,7 @@ fun PatchScreen(
             preferences = preferences,
             onPatchCountChange = onPatchCountChange,
             onNotifyTimeChange = onNotifyTimeChange,
+            onReset = onReset,
         )
 
         Spacer(Modifier.height(16.dp))
@@ -329,8 +331,10 @@ private fun SettingsSection(
     preferences: PatchPreferences,
     onPatchCountChange: (Int) -> Unit,
     onNotifyTimeChange: (Int, Int) -> Unit,
+    onReset: () -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
+    var showResetConfirm by remember { mutableStateOf(false) }
     val haptic = LocalHapticFeedback.current
 
     Column(
@@ -351,7 +355,6 @@ private fun SettingsSection(
         if (expanded) {
             Spacer(Modifier.height(12.dp))
 
-            // Patch count
             SettingRow(label = "Patches per change") {
                 StepperControl(
                     value = preferences.patchCount,
@@ -363,13 +366,38 @@ private fun SettingsSection(
 
             Spacer(Modifier.height(16.dp))
 
-            // Notification time
             SettingRow(label = "Remind me at") {
                 TimeStepperControl(
                     hour = preferences.notifyHour,
                     minute = preferences.notifyMinute,
                     onTimeChange = onNotifyTimeChange,
                 )
+            }
+
+            Spacer(Modifier.height(24.dp))
+
+            if (showResetConfirm) {
+                Button(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onReset()
+                        showResetConfirm = false
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFEF4444),
+                    ),
+                ) {
+                    Text("TAP AGAIN TO CONFIRM RESET", fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                }
+            } else {
+                TextButton(onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    showResetConfirm = true
+                }) {
+                    Text("Reset all patches", color = Color(0xFFEF4444), fontSize = 13.sp)
+                }
             }
         }
     }

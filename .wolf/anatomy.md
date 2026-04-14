@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-04-14T01:42:59.477Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-04-14T01:53:19.058Z
 > Files: 44 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
@@ -34,7 +34,7 @@
 
 ## app/src/main/java/com/patch/notifier/
 
-- `MainActivity.kt` — MainActivity: onCreate, onNewIntent (~2336 tok)
+- `MainActivity.kt` — MainActivity: onCreate, onNewIntent (~2590 tok)
 - `PatchApp.kt` — PatchApp: onCreate (~256 tok)
 
 ## app/src/main/java/com/patch/notifier/alarm/
@@ -56,7 +56,7 @@
 ## app/src/main/java/com/patch/notifier/ui/
 
 - `DisplayUtils.kt` — Data class: StatusInfo (~312 tok)
-- `PatchScreen.kt` — PatchScreen, StatusHeader, LocationGrid, ThighColumn, LocationButton (~4419 tok)
+- `PatchScreen.kt` — PatchScreen, StatusHeader, LocationGrid, ThighColumn, LocationButton (~4722 tok)
 - `Theme.kt` — PatchTheme (~242 tok)
 
 ## app/src/main/java/com/patch/notifier/widget/
@@ -69,12 +69,12 @@
 
 - `ic_launcher_background.xml` (~88 tok)
 - `ic_launcher_foreground.xml` (~471 tok)
-- `widget_background.xml` (~59 tok)
+- `widget_background.xml` (~76 tok)
 
 ## app/src/main/res/layout/
 
 - `widget_loading.xml` (~138 tok)
-- `widget_patch.xml` (~301 tok)
+- `widget_patch.xml` (~252 tok)
 
 ## app/src/main/res/mipmap-anydpi-v26/
 

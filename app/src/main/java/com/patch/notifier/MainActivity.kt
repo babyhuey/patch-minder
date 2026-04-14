@@ -108,6 +108,22 @@ class MainActivity : ComponentActivity() {
                                 selectedIds + id
                             }
                         },
+                        onReset = {
+                            val context = this@MainActivity
+                            lifecycleScope.launch(Dispatchers.IO) {
+                                try {
+                                    val allPatches = dao.getAll()
+                                    for (patch in allPatches) {
+                                        dao.upsert(patch.copy(appliedAt = null, dueAt = null))
+                                        AlarmScheduler.cancelAlarms(context, patch.id)
+                                    }
+                                    PatchWidgetReceiver.updateAllWidgets(context)
+                                } catch (e: Exception) {
+                                    Log.e("MainActivity", "Failed to reset patches", e)
+                                }
+                                launch(Dispatchers.Main) { autoSelected = false }
+                            }
+                        },
                         onConfirm = {
                             val now = System.currentTimeMillis()
                             val rawDueAt = now + PATCH_DURATION_MS
