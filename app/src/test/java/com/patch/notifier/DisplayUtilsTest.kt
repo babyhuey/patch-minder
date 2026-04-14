@@ -34,7 +34,7 @@ class DisplayUtilsTest {
     fun `status - due today (less than 24h away)`() {
         val dueAt = now + 12L * 60 * 60 * 1000 // 12 hours from now
         val status = formatStatusInfo(dueAt, 1, now)
-        assertEquals("1 patches · due today", status.timeText)
+        assertEquals("1 patch · due today", status.timeText)
         assertFalse(status.isOverdue)
     }
 
@@ -73,7 +73,7 @@ class DisplayUtilsTest {
     @Test
     fun `status - exactly now`() {
         val status = formatStatusInfo(now, 1, now)
-        assertEquals("1 patches · due today", status.timeText)
+        assertEquals("1 patch · due today", status.timeText)
         assertFalse(status.isOverdue)
     }
 

@@ -14,11 +14,12 @@ fun formatStatusInfo(earliestDueAt: Long, patchCount: Int, nowMs: Long): StatusI
     val daysAway = TimeUnit.MILLISECONDS.toDays(deltaMs)
 
     val headerLabel = if (isOverdue) "OVERDUE" else "NEXT REPLACEMENT"
+    val patchWord = if (patchCount == 1) "patch" else "patches"
     val timeText = when {
-        isOverdue -> "$patchCount patches · overdue!"
-        daysAway == 0L -> "$patchCount patches · due today"
-        daysAway == 1L -> "$patchCount patches · tomorrow"
-        else -> "$patchCount patches · ${daysAway}d from now"
+        isOverdue -> "$patchCount $patchWord · overdue!"
+        daysAway == 0L -> "$patchCount $patchWord · due today"
+        daysAway == 1L -> "$patchCount $patchWord · tomorrow"
+        else -> "$patchCount $patchWord · ${daysAway}d from now"
     }
     return StatusInfo(headerLabel, timeText, isOverdue)
 }

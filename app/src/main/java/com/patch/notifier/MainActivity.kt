@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -120,14 +121,22 @@ class MainActivity : ComponentActivity() {
                             showConfirmation = true
 
                             lifecycleScope.launch(Dispatchers.IO) {
-                                for (id in idsToReplace) {
-                                    val patch = currentPatches.find { it.id == id } ?: continue
-                                    dao.upsert(patch.copy(appliedAt = now, dueAt = dueAt))
+                                try {
+                                    for (id in idsToReplace) {
+                                        val patch = currentPatches.find { it.id == id } ?: continue
+                                        dao.upsert(patch.copy(appliedAt = now, dueAt = dueAt))
 
-                                    AlarmScheduler.cancelAlarms(context, id)
-                                    AlarmScheduler.schedulePatchAlarm(
-                                        context, id, patch.location, dueAt,
-                                    )
+                                        AlarmScheduler.cancelAlarms(context, id)
+                                        AlarmScheduler.schedulePatchAlarm(
+                                            context, id, patch.location, dueAt,
+                                        )
+                                    }
+                                } catch (e: Exception) {
+                                    Log.e("MainActivity", "Failed to save patch replacement", e)
+                                    launch(Dispatchers.Main) {
+                                        selectedIds = idsToReplace
+                                        showConfirmation = false
+                                    }
                                 }
                             }
 
@@ -147,16 +156,19 @@ class MainActivity : ComponentActivity() {
                         },
                         onNotifyTimeChange = { hour, minute ->
                             lifecycleScope.launch(Dispatchers.IO) {
-                                UserPreferences.setNotifyTime(appContext, hour, minute)
-                                // Reschedule all active alarms with new notify time
-                                val activePatches = dao.getActivePatchesByDueDate()
-                                for (patch in activePatches) {
-                                    val appliedAt = patch.appliedAt ?: continue
-                                    val rawDueAt = appliedAt + PATCH_DURATION_MS
-                                    val newDueAt = AlarmScheduler.adjustToNotifyTime(rawDueAt, hour, minute)
-                                    dao.upsert(patch.copy(dueAt = newDueAt))
-                                    AlarmScheduler.cancelAlarms(appContext, patch.id)
-                                    AlarmScheduler.schedulePatchAlarm(appContext, patch.id, patch.location, newDueAt)
+                                try {
+                                    UserPreferences.setNotifyTime(appContext, hour, minute)
+                                    val activePatches = dao.getActivePatchesByDueDate()
+                                    for (patch in activePatches) {
+                                        val appliedAt = patch.appliedAt ?: continue
+                                        val rawDueAt = appliedAt + PATCH_DURATION_MS
+                                        val newDueAt = AlarmScheduler.adjustToNotifyTime(rawDueAt, hour, minute)
+                                        dao.upsert(patch.copy(dueAt = newDueAt))
+                                        AlarmScheduler.cancelAlarms(appContext, patch.id)
+                                        AlarmScheduler.schedulePatchAlarm(appContext, patch.id, patch.location, newDueAt)
+                                    }
+                                } catch (e: Exception) {
+                                    Log.e("MainActivity", "Failed to reschedule alarms for new time", e)
                                 }
                             }
                         },

@@ -8,6 +8,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.patch.notifier.MainActivity
 import com.patch.notifier.PatchApp
+import android.util.Log
 import com.patch.notifier.data.PatchDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -64,6 +65,14 @@ class AlarmReceiver : BroadcastReceiver() {
 
                 if (shouldScheduleNextNag(nagCount)) {
                     AlarmScheduler.scheduleNagAlarm(context, patchId, location, nagCount)
+                }
+            } catch (e: Exception) {
+                Log.e("AlarmReceiver", "Failed to process alarm for patch $patchId", e)
+                // Still try to show notification even if DB check failed
+                try {
+                    showNotification(context, patchId, location, isNag, nagCount)
+                } catch (e2: Exception) {
+                    Log.e("AlarmReceiver", "Fallback notification also failed", e2)
                 }
             } finally {
                 pendingResult.finish()

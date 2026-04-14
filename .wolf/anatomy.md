@@ -1,6 +1,6 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-04-14T00:57:05.133Z
+> Auto-maintained by OpenWolf. Last scanned: 2026-04-14T01:11:10.168Z
 > Files: 36 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
@@ -34,17 +34,17 @@
 
 ## app/src/main/java/com/patch/notifier/
 
-- `MainActivity.kt` — MainActivity: onCreate, onNewIntent (~1901 tok)
+- `MainActivity.kt` — MainActivity: onCreate, onNewIntent (~2300 tok)
 - `PatchApp.kt` — PatchApp: onCreate (~256 tok)
 
 ## app/src/main/java/com/patch/notifier/alarm/
 
-- `AlarmReceiver.kt` — Returns true if the patch was recently replaced and nag should be suppressed. (~1298 tok)
-- `AlarmScheduler.kt` — Adjusts a raw dueAt timestamp to fire at the preferred notification time on that day. (~1281 tok)
+- `AlarmReceiver.kt` — Returns true if the patch was recently replaced and nag should be suppressed. (~1423 tok)
+- `AlarmScheduler.kt` — Adjusts a raw dueAt timestamp to fire at the preferred notification time on that day. (~1260 tok)
 
 ## app/src/main/java/com/patch/notifier/boot/
 
-- `BootReceiver.kt` — BootReceiver: onReceive (~446 tok)
+- `BootReceiver.kt` — BootReceiver: onReceive (~441 tok)
 
 ## app/src/main/java/com/patch/notifier/data/
 
@@ -55,7 +55,7 @@
 
 ## app/src/main/java/com/patch/notifier/ui/
 
-- `DisplayUtils.kt` — Data class: StatusInfo (~292 tok)
+- `DisplayUtils.kt` — Data class: StatusInfo (~312 tok)
 - `PatchScreen.kt` — PatchScreen, StatusHeader, LocationGrid, ThighColumn, LocationButton (~4419 tok)
 - `Theme.kt` — PatchTheme (~242 tok)
 
@@ -77,8 +77,8 @@
 ## app/src/test/java/com/patch/notifier/
 
 - `AlarmReceiverTest.kt` — Declares AlarmReceiverTest (~1015 tok)
-- `AlarmSchedulerTest.kt` — Declares AlarmSchedulerTest (~1097 tok)
-- `DisplayUtilsTest.kt` — Declares DisplayUtilsTest (~926 tok)
+- `AlarmSchedulerTest.kt` — AlarmSchedulerTest: fixedDueAt (~1583 tok)
+- `DisplayUtilsTest.kt` — Declares DisplayUtilsTest (~924 tok)
 - `RotationLogicTest.kt` — Declares RotationLogicTest (~1134 tok)
 
 ## docs/superpowers/plans/

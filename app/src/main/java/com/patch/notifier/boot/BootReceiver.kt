@@ -3,6 +3,7 @@ package com.patch.notifier.boot
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import com.patch.notifier.alarm.AlarmScheduler
 import com.patch.notifier.data.PATCH_DURATION_MS
 import com.patch.notifier.data.PatchDatabase
@@ -29,13 +30,13 @@ class BootReceiver : BroadcastReceiver() {
                             context, patch.id, patch.location, dueAt,
                         )
                     } else if (now - dueAt < PATCH_DURATION_MS) {
-                        // Overdue but less than 7 days old — still worth nagging
                         AlarmScheduler.scheduleNagAlarm(
                             context, patch.id, patch.location, nagCount = 0,
                         )
                     }
-                    // Patches overdue by more than 7 days are stale — skip them
                 }
+            } catch (e: Exception) {
+                Log.e("BootReceiver", "Failed to reschedule alarms after boot", e)
             } finally {
                 pendingResult.finish()
             }
