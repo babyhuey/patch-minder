@@ -117,23 +117,32 @@ private fun StatusHeader(patches: List<Patch>) {
         val daysAway = TimeUnit.MILLISECONDS.toDays(earliest - System.currentTimeMillis())
         val patchCount = activeDueDates.size
 
+        val isOverdue = daysAway < 0
+        val headerLabel = if (isOverdue) "OVERDUE" else "NEXT REPLACEMENT"
+        val timeText = when {
+            daysAway < 0 -> "$patchCount patches · overdue!"
+            daysAway == 0L -> "$patchCount patches · due today"
+            daysAway == 1L -> "$patchCount patches · tomorrow"
+            else -> "$patchCount patches · ${daysAway}d from now"
+        }
+
         Text(
-            text = "NEXT REPLACEMENT",
-            color = TextSecondary,
+            text = headerLabel,
+            color = if (isOverdue) Color(0xFFEF4444) else TextSecondary,
             fontSize = 12.sp,
             letterSpacing = 1.sp,
         )
         Spacer(Modifier.height(4.dp))
         Text(
             text = dateFormat.format(Date(earliest)),
-            color = TextPrimary,
+            color = if (isOverdue) Color(0xFFEF4444) else TextPrimary,
             fontSize = 24.sp,
             fontWeight = FontWeight.SemiBold,
         )
         Spacer(Modifier.height(4.dp))
         Text(
-            text = "$patchCount patches · ${daysAway}d from now",
-            color = TextMuted,
+            text = timeText,
+            color = if (isOverdue) Color(0xFFEF4444) else TextMuted,
             fontSize = 14.sp,
         )
     }

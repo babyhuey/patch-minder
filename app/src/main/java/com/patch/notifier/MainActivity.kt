@@ -13,24 +13,29 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.lifecycleScope
 import com.patch.notifier.alarm.AlarmScheduler
+import com.patch.notifier.data.PATCH_DURATION_MS
 import com.patch.notifier.data.PatchDatabase
 import com.patch.notifier.data.suggestLocations
 import com.patch.notifier.ui.Navy
 import com.patch.notifier.ui.PatchScreen
 import com.patch.notifier.ui.PatchTheme
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+
+    companion object {
+        const val EXTRA_DUE_PATCH_IDS = "due_patch_ids"
+    }
 
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission(),
@@ -47,7 +52,6 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // Request exact alarm permission on Android 12+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val alarmManager = getSystemService(AlarmManager::class.java)
             if (!alarmManager.canScheduleExactAlarms()) {
@@ -58,6 +62,9 @@ class MainActivity : ComponentActivity() {
         val db = PatchDatabase.getInstance(this)
         val dao = db.patchDao()
 
+        // Patch IDs from notification tap (pre-select overdue patches)
+        val duePatchIds = intent?.getIntArrayExtra(EXTRA_DUE_PATCH_IDS)?.toSet()
+
         setContent {
             PatchTheme {
                 Surface(
@@ -66,13 +73,18 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val patches by dao.observeAll().collectAsState(initial = emptyList())
                     var selectedIds by remember { mutableStateOf<Set<Int>>(emptySet()) }
-                    var suggestionsApplied by remember { mutableStateOf(false) }
+                    var hasAutoSelected by remember { mutableStateOf(false) }
                     var showConfirmation by remember { mutableStateOf(false) }
 
-                    LaunchedEffect(patches) {
-                        if (patches.isNotEmpty() && !suggestionsApplied) {
-                            selectedIds = suggestLocations(patches).toSet()
-                            suggestionsApplied = true
+                    // Auto-select on first load or after confirm resets
+                    LaunchedEffect(patches, hasAutoSelected) {
+                        if (patches.isNotEmpty() && !hasAutoSelected) {
+                            selectedIds = if (duePatchIds != null && duePatchIds.isNotEmpty()) {
+                                duePatchIds
+                            } else {
+                                suggestLocations(patches).toSet()
+                            }
+                            hasAutoSelected = true
                         }
                     }
 
@@ -88,18 +100,18 @@ class MainActivity : ComponentActivity() {
                         },
                         onConfirm = {
                             val now = System.currentTimeMillis()
-                            val dueAt = now + 7 * 24 * 60 * 60 * 1000L
+                            val dueAt = now + PATCH_DURATION_MS
                             val context = this@MainActivity
                             val idsToReplace = selectedIds.toSet()
+                            val currentPatches = patches.toList()
 
                             selectedIds = emptySet()
                             showConfirmation = true
 
-                            CoroutineScope(Dispatchers.IO).launch {
+                            lifecycleScope.launch(Dispatchers.IO) {
                                 for (id in idsToReplace) {
-                                    val patch = patches.find { it.id == id } ?: continue
-                                    val updated = patch.copy(appliedAt = now, dueAt = dueAt)
-                                    dao.upsert(updated)
+                                    val patch = currentPatches.find { it.id == id } ?: continue
+                                    dao.upsert(patch.copy(appliedAt = now, dueAt = dueAt))
 
                                     AlarmScheduler.cancelAlarms(context, id)
                                     AlarmScheduler.schedulePatchAlarm(
@@ -108,9 +120,10 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
 
-                            CoroutineScope(Dispatchers.Main).launch {
+                            lifecycleScope.launch {
                                 delay(1500)
                                 showConfirmation = false
+                                hasAutoSelected = false // triggers re-suggestion
                             }
                         },
                         showConfirmation = showConfirmation,

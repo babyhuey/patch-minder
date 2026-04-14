@@ -59,4 +59,41 @@ class RotationLogicTest {
         val suggested = suggestLocations(patches, count = 1)
         assertEquals(1, suggested.size)
     }
+
+    @Test
+    fun `all patches overdue - suggests oldest first`() {
+        val oldTime = 1000L
+        val patches = listOf(
+            Patch(1, "Left Upper", oldTime, oldTime + 604800000),
+            Patch(2, "Left Lower", oldTime + 100, oldTime + 604800100),
+            Patch(3, "Right Upper", oldTime + 200, oldTime + 604800200),
+            Patch(4, "Right Lower", oldTime + 300, oldTime + 604800300),
+        )
+        val suggested = suggestLocations(patches)
+        assertEquals(listOf(1, 2, 3), suggested)
+    }
+
+    @Test
+    fun `count larger than list size - returns all patches`() {
+        val patches = listOf(
+            Patch(1, "Left Upper", null, null),
+            Patch(2, "Left Lower", null, null),
+        )
+        val suggested = suggestLocations(patches, count = 5)
+        assertEquals(2, suggested.size)
+        assertEquals(listOf(1, 2), suggested)
+    }
+
+    @Test
+    fun `stable sort - same appliedAt orders by id`() {
+        val now = 1000L
+        val patches = listOf(
+            Patch(3, "Right Upper", now, now + 604800000),
+            Patch(1, "Left Upper", now, now + 604800000),
+            Patch(4, "Right Lower", now, now + 604800000),
+            Patch(2, "Left Lower", now, now + 604800000),
+        )
+        val suggested = suggestLocations(patches)
+        assertEquals(listOf(1, 2, 3), suggested)
+    }
 }
