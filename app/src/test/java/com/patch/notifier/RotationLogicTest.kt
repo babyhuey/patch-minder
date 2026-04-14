@@ -1,8 +1,10 @@
 package com.patch.notifier
 
+import com.patch.notifier.data.PATCH_DURATION_MS
 import com.patch.notifier.data.Patch
 import com.patch.notifier.data.suggestLocations
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class RotationLogicTest {
@@ -95,5 +97,27 @@ class RotationLogicTest {
         )
         val suggested = suggestLocations(patches)
         assertEquals(listOf(1, 2, 3), suggested)
+    }
+
+    @Test
+    fun `empty list returns empty`() {
+        assertEquals(emptyList<Int>(), suggestLocations(emptyList()))
+    }
+
+    @Test
+    fun `count zero returns empty`() {
+        val patches = listOf(Patch(1, "Left Upper", null, null))
+        assertEquals(emptyList<Int>(), suggestLocations(patches, count = 0))
+    }
+
+    @Test
+    fun `negative count returns empty`() {
+        val patches = listOf(Patch(1, "Left Upper", null, null))
+        assertEquals(emptyList<Int>(), suggestLocations(patches, count = -1))
+    }
+
+    @Test
+    fun `PATCH_DURATION_MS is exactly 7 days`() {
+        assertEquals(604_800_000L, PATCH_DURATION_MS)
     }
 }

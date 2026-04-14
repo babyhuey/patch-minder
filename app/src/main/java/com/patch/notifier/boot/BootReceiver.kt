@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.patch.notifier.alarm.AlarmScheduler
+import com.patch.notifier.data.PATCH_DURATION_MS
 import com.patch.notifier.data.PatchDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,12 +28,13 @@ class BootReceiver : BroadcastReceiver() {
                         AlarmScheduler.schedulePatchAlarm(
                             context, patch.id, patch.location, dueAt,
                         )
-                    } else {
-                        // Already overdue — fire nag immediately
+                    } else if (now - dueAt < PATCH_DURATION_MS) {
+                        // Overdue but less than 7 days old — still worth nagging
                         AlarmScheduler.scheduleNagAlarm(
                             context, patch.id, patch.location, nagCount = 0,
                         )
                     }
+                    // Patches overdue by more than 7 days are stale — skip them
                 }
             } finally {
                 pendingResult.finish()

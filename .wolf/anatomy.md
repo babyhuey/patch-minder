@@ -1,7 +1,7 @@
 # anatomy.md
 
-> Auto-maintained by OpenWolf. Last scanned: 2026-04-14T00:40:25.958Z
-> Files: 32 tracked | Anatomy hits: 0 | Misses: 0
+> Auto-maintained by OpenWolf. Last scanned: 2026-04-14T00:51:22.104Z
+> Files: 35 tracked | Anatomy hits: 0 | Misses: 0
 
 ## ./
 
@@ -39,22 +39,23 @@
 
 ## app/src/main/java/com/patch/notifier/alarm/
 
-- `AlarmReceiver.kt` — AlarmReceiver: onReceive, showNotification (~1201 tok)
+- `AlarmReceiver.kt` — Returns true if the patch was recently replaced and nag should be suppressed. (~1298 tok)
 - `AlarmScheduler.kt` — patchAlarmRequestCode, nagAlarmRequestCode, nagDelayMs, canScheduleExact, scheduleAlarm (~1030 tok)
 
 ## app/src/main/java/com/patch/notifier/boot/
 
-- `BootReceiver.kt` — BootReceiver: onReceive (~397 tok)
+- `BootReceiver.kt` — BootReceiver: onReceive (~446 tok)
 
 ## app/src/main/java/com/patch/notifier/data/
 
-- `Patch.kt` — Data class: Patch (~149 tok)
+- `Patch.kt` — Data class: Patch (~165 tok)
 - `PatchDao.kt` — observeAll, getAll, upsert, upsertAll, getById (~188 tok)
 - `PatchDatabase.kt` — PatchDatabase: patchDao, getInstance, onCreate (~476 tok)
 
 ## app/src/main/java/com/patch/notifier/ui/
 
-- `PatchScreen.kt` — PatchScreen, StatusHeader, LocationGrid, ThighColumn, LocationButton (~2579 tok)
+- `DisplayUtils.kt` — Data class: StatusInfo (~292 tok)
+- `PatchScreen.kt` — PatchScreen, StatusHeader, LocationGrid, ThighColumn, LocationButton (~2409 tok)
 - `Theme.kt` — PatchTheme (~242 tok)
 
 ## app/src/main/res/drawable/
@@ -74,8 +75,10 @@
 
 ## app/src/test/java/com/patch/notifier/
 
-- `AlarmSchedulerTest.kt` — Declares AlarmSchedulerTest (~232 tok)
-- `RotationLogicTest.kt` — Declares RotationLogicTest (~939 tok)
+- `AlarmReceiverTest.kt` — Declares AlarmReceiverTest (~1015 tok)
+- `AlarmSchedulerTest.kt` — Declares AlarmSchedulerTest (~759 tok)
+- `DisplayUtilsTest.kt` — Declares DisplayUtilsTest (~926 tok)
+- `RotationLogicTest.kt` — Declares RotationLogicTest (~1134 tok)
 
 ## docs/superpowers/plans/
 

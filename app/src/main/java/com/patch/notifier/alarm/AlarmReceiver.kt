@@ -16,8 +16,26 @@ import kotlinx.coroutines.launch
 class AlarmReceiver : BroadcastReceiver() {
 
     companion object {
-        private const val NAG_LIMIT = 48 // stop after 4 days of nagging (48 * 2h)
+        const val NAG_LIMIT = 48 // stop after 4 days of nagging (48 * 2h)
+        private const val NAG_SUPPRESSION_TOLERANCE_MS = 60_000L
         private const val GROUP_KEY = "com.patch.notifier.PATCH_DUE_GROUP"
+
+        /** Returns true if the patch was recently replaced and nag should be suppressed. */
+        fun shouldSuppressNag(patchDueAt: Long?, nowMs: Long): Boolean {
+            if (patchDueAt == null) return false
+            return patchDueAt > nowMs + NAG_SUPPRESSION_TOLERANCE_MS
+        }
+
+        /** Returns true if another nag should be scheduled after this one. */
+        fun shouldScheduleNextNag(nagCount: Int): Boolean = nagCount < NAG_LIMIT
+
+        fun notificationTitle(isNag: Boolean): String =
+            if (isNag) "Patch Still Needs Replacing!" else "Patch Replacement Due"
+
+        fun notificationBody(location: String): String = "Time to replace: $location"
+
+        fun notificationPriority(nagCount: Int): Int =
+            if (nagCount >= 2) NotificationCompat.PRIORITY_MAX else NotificationCompat.PRIORITY_HIGH
     }
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -37,20 +55,14 @@ class AlarmReceiver : BroadcastReceiver() {
                 val dao = PatchDatabase.getInstance(context).patchDao()
                 val patch = dao.getById(patchId)
 
-                // If patch was replaced recently (dueAt is well into the future), stop nagging.
-                // Use a 60-second tolerance so the primary alarm isn't suppressed if it fires
-                // a few ms before the exact dueAt.
-                if (patch != null && patch.dueAt != null) {
-                    val now = System.currentTimeMillis()
-                    if (patch.dueAt > now + 60_000) {
-                        return@launch
-                    }
+                val now = System.currentTimeMillis()
+                if (shouldSuppressNag(patch?.dueAt, now)) {
+                    return@launch
                 }
 
                 showNotification(context, patchId, location, isNag, nagCount)
 
-                // Schedule next nag unless we've hit the limit
-                if (nagCount < NAG_LIMIT) {
+                if (shouldScheduleNextNag(nagCount)) {
                     AlarmScheduler.scheduleNagAlarm(context, patchId, location, nagCount)
                 }
             } finally {
@@ -77,13 +89,9 @@ class AlarmReceiver : BroadcastReceiver() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
-        val title = if (isNag) "Patch Still Needs Replacing!" else "Patch Replacement Due"
-        val body = "Time to replace: $location"
-        val priority = if (nagCount >= 2) {
-            NotificationCompat.PRIORITY_MAX
-        } else {
-            NotificationCompat.PRIORITY_HIGH
-        }
+        val title = notificationTitle(isNag)
+        val body = notificationBody(location)
+        val priority = notificationPriority(nagCount)
 
         val notification = NotificationCompat.Builder(context, PatchApp.CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_dialog_info)

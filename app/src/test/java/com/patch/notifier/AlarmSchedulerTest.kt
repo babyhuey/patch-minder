@@ -2,6 +2,7 @@ package com.patch.notifier
 
 import com.patch.notifier.alarm.AlarmScheduler
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Test
 
 class AlarmSchedulerTest {
@@ -19,9 +20,66 @@ class AlarmSchedulerTest {
     }
 
     @Test
+    fun `patch and nag request codes never collide for valid patch ids`() {
+        for (id in 1..4) {
+            assertNotEquals(
+                "Patch and nag codes should not collide for id=$id",
+                AlarmScheduler.patchAlarmRequestCode(id),
+                AlarmScheduler.nagAlarmRequestCode(id),
+            )
+        }
+    }
+
+    @Test
+    fun `patch alarm codes are unique across all patch ids`() {
+        val codes = (1..4).map { AlarmScheduler.patchAlarmRequestCode(it) }.toSet()
+        assertEquals(4, codes.size)
+    }
+
+    @Test
+    fun `nag alarm codes are unique across all patch ids`() {
+        val codes = (1..4).map { AlarmScheduler.nagAlarmRequestCode(it) }.toSet()
+        assertEquals(4, codes.size)
+    }
+
+    @Test
+    fun `no overlap between any patch code and any nag code`() {
+        val patchCodes = (1..4).map { AlarmScheduler.patchAlarmRequestCode(it) }.toSet()
+        val nagCodes = (1..4).map { AlarmScheduler.nagAlarmRequestCode(it) }.toSet()
+        val overlap = patchCodes.intersect(nagCodes)
+        assertEquals("Should have no overlapping codes", emptySet<Int>(), overlap)
+    }
+
+    @Test
+    fun `request code for patch id 0`() {
+        assertEquals(1000, AlarmScheduler.patchAlarmRequestCode(0))
+        assertEquals(2000, AlarmScheduler.nagAlarmRequestCode(0))
+    }
+
+    @Test
     fun `nag delay is 1 hour for first nag then 2 hours`() {
         assertEquals(3600000L, AlarmScheduler.nagDelayMs(nagCount = 0))
         assertEquals(7200000L, AlarmScheduler.nagDelayMs(nagCount = 1))
         assertEquals(7200000L, AlarmScheduler.nagDelayMs(nagCount = 5))
+    }
+
+    @Test
+    fun `nag delay with negative count returns repeat delay`() {
+        assertEquals(7200000L, AlarmScheduler.nagDelayMs(nagCount = -1))
+    }
+
+    @Test
+    fun `nag delay for large count still returns repeat delay`() {
+        assertEquals(7200000L, AlarmScheduler.nagDelayMs(nagCount = 100))
+    }
+
+    @Test
+    fun `first nag delay is exactly 1 hour in ms`() {
+        assertEquals(60 * 60 * 1000L, AlarmScheduler.nagDelayMs(0))
+    }
+
+    @Test
+    fun `repeat nag delay is exactly 2 hours in ms`() {
+        assertEquals(2 * 60 * 60 * 1000L, AlarmScheduler.nagDelayMs(1))
     }
 }

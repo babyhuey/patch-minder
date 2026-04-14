@@ -31,7 +31,6 @@ import com.patch.notifier.data.Patch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import java.util.concurrent.TimeUnit
 
 @Composable
 fun PatchScreen(
@@ -114,35 +113,26 @@ private fun StatusHeader(patches: List<Patch>) {
     } else {
         val earliest = activeDueDates.min()
         val dateFormat = SimpleDateFormat("EEEE, MMM d", Locale.getDefault())
-        val daysAway = TimeUnit.MILLISECONDS.toDays(earliest - System.currentTimeMillis())
-        val patchCount = activeDueDates.size
-
-        val isOverdue = daysAway < 0
-        val headerLabel = if (isOverdue) "OVERDUE" else "NEXT REPLACEMENT"
-        val timeText = when {
-            daysAway < 0 -> "$patchCount patches · overdue!"
-            daysAway == 0L -> "$patchCount patches · due today"
-            daysAway == 1L -> "$patchCount patches · tomorrow"
-            else -> "$patchCount patches · ${daysAway}d from now"
-        }
+        val now = System.currentTimeMillis()
+        val status = formatStatusInfo(earliest, activeDueDates.size, now)
 
         Text(
-            text = headerLabel,
-            color = if (isOverdue) Color(0xFFEF4444) else TextSecondary,
+            text = status.headerLabel,
+            color = if (status.isOverdue) Color(0xFFEF4444) else TextSecondary,
             fontSize = 12.sp,
             letterSpacing = 1.sp,
         )
         Spacer(Modifier.height(4.dp))
         Text(
             text = dateFormat.format(Date(earliest)),
-            color = if (isOverdue) Color(0xFFEF4444) else TextPrimary,
+            color = if (status.isOverdue) Color(0xFFEF4444) else TextPrimary,
             fontSize = 24.sp,
             fontWeight = FontWeight.SemiBold,
         )
         Spacer(Modifier.height(4.dp))
         Text(
-            text = timeText,
-            color = if (isOverdue) Color(0xFFEF4444) else TextMuted,
+            text = status.timeText,
+            color = if (status.isOverdue) Color(0xFFEF4444) else TextMuted,
             fontSize = 14.sp,
         )
     }
@@ -256,15 +246,7 @@ private fun LocationButton(
         label = "text",
     )
 
-    val daysLeftText = dueAt?.let {
-        val days = TimeUnit.MILLISECONDS.toDays(it - System.currentTimeMillis())
-        when {
-            days < 0 -> "overdue!"
-            days == 0L -> "due today"
-            days == 1L -> "1 day left"
-            else -> "${days}d left"
-        }
-    }
+    val daysLeftText = dueAt?.let { formatDaysLeft(it, System.currentTimeMillis()) }
 
     Card(
         shape = RoundedCornerShape(12.dp),
