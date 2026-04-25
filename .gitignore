@@ -6,3 +6,17 @@ app/build/
 local.properties
 .superpowers/
 .wolf/hooks/
+
+# OS / editor
+.DS_Store
+*.swp
+*.swo
+
+# APKs (built artifacts)
+*.apk
+*.aab
+
+# Keystores / signing
+*.keystore
+*.jks
+keystore.properties
