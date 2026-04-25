@@ -108,6 +108,23 @@ class MainActivity : ComponentActivity() {
                                 selectedIds + id
                             }
                         },
+                        onRemove = { id ->
+                            val context = this@MainActivity
+                            val currentPatches = patches.toList()
+                            selectedIds = selectedIds - id
+                            lifecycleScope.launch(Dispatchers.IO) {
+                                try {
+                                    val patch = currentPatches.find { it.id == id }
+                                        ?: dao.getById(id)
+                                        ?: return@launch
+                                    dao.upsert(patch.copy(appliedAt = null, dueAt = null))
+                                    AlarmScheduler.cancelAlarms(context, id)
+                                    PatchWidgetReceiver.updateAllWidgets(context)
+                                } catch (e: Exception) {
+                                    Log.e("MainActivity", "Failed to remove patch", e)
+                                }
+                            }
+                        },
                         onReset = {
                             val context = this@MainActivity
                             selectedIds = emptySet()

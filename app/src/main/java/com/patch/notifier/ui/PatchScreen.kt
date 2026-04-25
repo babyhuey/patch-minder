@@ -3,7 +3,9 @@ package com.patch.notifier.ui
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -53,12 +55,22 @@ fun PatchScreen(
     onToggle: (Int) -> Unit,
     onConfirm: () -> Unit,
     onReset: () -> Unit,
+    onRemove: (Int) -> Unit,
     showConfirmation: Boolean,
     preferences: PatchPreferences,
     onPatchCountChange: (Int) -> Unit,
     onNotifyTimeChange: (Int, Int) -> Unit,
 ) {
     val haptic = LocalHapticFeedback.current
+    var pendingRemovalId by remember { mutableStateOf<Int?>(null) }
+
+    LaunchedEffect(pendingRemovalId) {
+        if (pendingRemovalId != null) {
+            @Suppress("RemoveRedundantQualifierName")
+            kotlinx.coroutines.delay(3000L)
+            pendingRemovalId = null
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -76,18 +88,40 @@ fun PatchScreen(
         LocationGrid(
             patches = patches,
             selectedIds = selectedIds,
+            pendingRemovalId = pendingRemovalId,
             onToggle = { id ->
-                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                onToggle(id)
+                if (pendingRemovalId == id) {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    pendingRemovalId = null
+                    onRemove(id)
+                } else {
+                    if (pendingRemovalId != null) pendingRemovalId = null
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    onToggle(id)
+                }
+            },
+            onLongPress = { patch ->
+                val active = patch.dueAt != null && patch.dueAt > 0
+                if (active) {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    if (patch.id in selectedIds) onToggle(patch.id)
+                    pendingRemovalId = patch.id
+                } else {
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                }
             },
         )
 
         Spacer(Modifier.height(12.dp))
 
         Text(
-            text = "${selectedIds.size} selected · tap to toggle",
+            text = if (pendingRemovalId != null)
+                "Tap red slot again to remove · or wait to cancel"
+            else
+                "${selectedIds.size} selected · tap to toggle · long-press to remove",
             color = TextSecondary,
             fontSize = 14.sp,
+            textAlign = TextAlign.Center,
         )
 
         Spacer(Modifier.height(24.dp))
@@ -178,7 +212,9 @@ private fun StatusHeader(patches: List<Patch>) {
 private fun LocationGrid(
     patches: List<Patch>,
     selectedIds: Set<Int>,
+    pendingRemovalId: Int?,
     onToggle: (Int) -> Unit,
+    onLongPress: (Patch) -> Unit,
 ) {
     val leftPatches = patches.filter { it.location.startsWith("Left") }
         .sortedBy { if (it.location.contains("Upper")) 0 else 1 }
@@ -193,14 +229,18 @@ private fun LocationGrid(
             label = "LEFT THIGH",
             patches = leftPatches,
             selectedIds = selectedIds,
+            pendingRemovalId = pendingRemovalId,
             onToggle = onToggle,
+            onLongPress = onLongPress,
             modifier = Modifier.weight(1f),
         )
         ThighColumn(
             label = "RIGHT THIGH",
             patches = rightPatches,
             selectedIds = selectedIds,
+            pendingRemovalId = pendingRemovalId,
             onToggle = onToggle,
+            onLongPress = onLongPress,
             modifier = Modifier.weight(1f),
         )
     }
@@ -211,7 +251,9 @@ private fun ThighColumn(
     label: String,
     patches: List<Patch>,
     selectedIds: Set<Int>,
+    pendingRemovalId: Int?,
     onToggle: (Int) -> Unit,
+    onLongPress: (Patch) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -239,8 +281,10 @@ private fun ThighColumn(
                     LocationButton(
                         label = patch.location.substringAfter(" "),
                         selected = selected,
+                        pendingRemoval = pendingRemovalId == patch.id,
                         dueAt = patch.dueAt,
                         onClick = { onToggle(patch.id) },
+                        onLongClick = { onLongPress(patch) },
                     )
                 }
             }
@@ -248,17 +292,21 @@ private fun ThighColumn(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun LocationButton(
     label: String,
     selected: Boolean,
+    pendingRemoval: Boolean,
     dueAt: Long?,
     onClick: () -> Unit,
+    onLongClick: () -> Unit,
 ) {
     val hasActivePatch = dueAt != null && dueAt > 0
 
     val backgroundColor by animateColorAsState(
         targetValue = when {
+            pendingRemoval -> Color(0xFFEF4444)
             selected -> Blue
             hasActivePatch -> Color(0xFF1E2A5E)
             else -> Navy
@@ -267,6 +315,7 @@ private fun LocationButton(
     )
     val borderColor by animateColorAsState(
         targetValue = when {
+            pendingRemoval -> Color(0xFFFCA5A5)
             selected -> BlueBright
             hasActivePatch -> Color(0xFF3A4A8A)
             else -> BorderColor
@@ -275,6 +324,7 @@ private fun LocationButton(
     )
     val textColor by animateColorAsState(
         targetValue = when {
+            pendingRemoval -> TextPrimary
             selected -> TextPrimary
             hasActivePatch -> TextSecondary
             else -> TextMuted
@@ -290,7 +340,10 @@ private fun LocationButton(
         border = BorderStroke(2.dp, borderColor),
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick,
+            ),
     ) {
         Column(
             modifier = Modifier
@@ -300,6 +353,7 @@ private fun LocationButton(
         ) {
             Text(
                 text = when {
+                    pendingRemoval -> "✕ $label"
                     selected -> "✓ $label"
                     hasActivePatch -> "● $label"
                     else -> label
@@ -309,7 +363,16 @@ private fun LocationButton(
                 fontSize = 15.sp,
                 textAlign = TextAlign.Center,
             )
-            if (daysLeftText != null) {
+            if (pendingRemoval) {
+                Text(
+                    text = "TAP TO REMOVE",
+                    color = TextPrimary,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.5.sp,
+                    textAlign = TextAlign.Center,
+                )
+            } else if (daysLeftText != null) {
                 Text(
                     text = daysLeftText,
                     color = when {
