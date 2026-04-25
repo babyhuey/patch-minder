@@ -1,4 +1,4 @@
-# Patch Notifier
+# Patch Minder
 
 A minimal Android app for tracking weekly patch replacements (estrogen, nicotine,
 fentanyl, scopolamine — anything on a 7-day rotation). Built for one user, one
