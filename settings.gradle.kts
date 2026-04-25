@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "patch-notifier"
+rootProject.name = "patch-minder"
 include(":app")

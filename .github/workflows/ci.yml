@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Android Docker image
+        run: docker build -t patch-minder-builder .
+
+      - name: Run unit tests in Docker
+        run: |
+          docker run --rm \
+            -v "$PWD":/project \
+            -w /project \
+            patch-minder-builder \
+            ./gradlew testDebugUnitTest --no-daemon --stacktrace
+
+      - name: Assemble debug APK in Docker
+        run: |
+          docker run --rm \
+            -v "$PWD":/project \
+            -w /project \
+            patch-minder-builder \
+            ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Upload test reports on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: app/build/reports/tests/
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error

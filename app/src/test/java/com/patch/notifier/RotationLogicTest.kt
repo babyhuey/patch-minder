@@ -117,6 +117,27 @@ class RotationLogicTest {
     }
 
     @Test
+    fun `removing one patch leaves others' due dates intact and re-suggests removed slot`() {
+        val now = 1_000_000_000L
+        val due = now + 604_800_000L
+        val patches = listOf(
+            Patch(1, "Left Upper", now, due),
+            Patch(2, "Left Lower", now, due),
+            Patch(3, "Right Upper", now, due),
+            Patch(4, "Right Lower", null, null),
+        )
+        val afterRemove = patches.map {
+            if (it.id == 2) it.copy(appliedAt = null, dueAt = null) else it
+        }
+        assertEquals(due, afterRemove.find { it.id == 1 }!!.dueAt)
+        assertEquals(due, afterRemove.find { it.id == 3 }!!.dueAt)
+        assertEquals(null, afterRemove.find { it.id == 2 }!!.dueAt)
+        val suggested = suggestLocations(afterRemove, count = 2)
+        assertTrue("removed slot should be suggested", 2 in suggested)
+        assertTrue("never-used slot should still be suggested", 4 in suggested)
+    }
+
+    @Test
     fun `PATCH_DURATION_MS is exactly 7 days`() {
         assertEquals(604_800_000L, PATCH_DURATION_MS)
     }
