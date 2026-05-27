@@ -7,6 +7,7 @@ enum class WidgetUrgency { GOOD, SOON, OVERDUE, NONE }
 data class PatchWidgetState(
     val daysUntilDue: Long?,
     val activePatchCount: Int,
+    val hoursUntilDue: Long? = null,
 ) {
     val urgency: WidgetUrgency
         get() = when {
@@ -20,6 +21,7 @@ data class PatchWidgetState(
         get() = when {
             daysUntilDue == null -> "—"
             daysUntilDue < 0 -> "!"
+            daysUntilDue == 0L && hoursUntilDue != null -> "${hoursUntilDue}h"
             daysUntilDue == 0L -> "0d"
             else -> "${daysUntilDue}d"
         }
@@ -28,6 +30,7 @@ data class PatchWidgetState(
         get() = when {
             daysUntilDue == null -> "no patches"
             daysUntilDue < 0 -> "overdue"
+            daysUntilDue == 0L && hoursUntilDue != null -> "left"
             daysUntilDue == 0L -> "today"
             daysUntilDue == 1L -> "tomorrow"
             else -> "left"
@@ -39,13 +42,10 @@ fun computeWidgetState(
     activePatchCount: Int,
     nowMs: Long,
 ): PatchWidgetState {
-    val daysUntilDue = earliestDueAt?.let {
-        val deltaMs = it - nowMs
-        if (deltaMs < 0) {
-            -1L // overdue (collapse all negative to -1)
-        } else {
-            TimeUnit.MILLISECONDS.toDays(deltaMs)
-        }
-    }
-    return PatchWidgetState(daysUntilDue, activePatchCount)
+    if (earliestDueAt == null) return PatchWidgetState(null, activePatchCount)
+    val deltaMs = earliestDueAt - nowMs
+    if (deltaMs < 0) return PatchWidgetState(-1L, activePatchCount)
+    val days = TimeUnit.MILLISECONDS.toDays(deltaMs)
+    val hours = if (days == 0L) (deltaMs + 1_800_000L) / 3_600_000L else null
+    return PatchWidgetState(days, activePatchCount, hours)
 }

@@ -40,6 +40,14 @@ class PatchWidgetStateTest {
         val dueAt = now + 12L * 60 * 60 * 1000
         val state = computeWidgetState(dueAt, 3, now)
         assertEquals(0L, state.daysUntilDue)
+        assertEquals(12L, state.hoursUntilDue)
+    }
+
+    @Test
+    fun `due today - rounds to nearest hour`() {
+        val dueAt = now + (5L * 60 + 45) * 60 * 1000 // 5h 45m → rounds to 6h
+        val state = computeWidgetState(dueAt, 1, now)
+        assertEquals(6L, state.hoursUntilDue)
     }
 
     @Test
@@ -113,8 +121,13 @@ class PatchWidgetStateTest {
     }
 
     @Test
-    fun `displayText 0 days`() {
+    fun `displayText 0 days no hours`() {
         assertEquals("0d", PatchWidgetState(0L, 3).displayText)
+    }
+
+    @Test
+    fun `displayText 0 days with hours`() {
+        assertEquals("8h", PatchWidgetState(0L, 3, hoursUntilDue = 8L).displayText)
     }
 
     @Test
@@ -140,8 +153,13 @@ class PatchWidgetStateTest {
     }
 
     @Test
-    fun `subtitleText today`() {
+    fun `subtitleText today no hours`() {
         assertEquals("today", PatchWidgetState(0L, 3).subtitleText)
+    }
+
+    @Test
+    fun `subtitleText today with hours`() {
+        assertEquals("left", PatchWidgetState(0L, 3, hoursUntilDue = 8L).subtitleText)
     }
 
     @Test
